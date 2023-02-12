@@ -150,15 +150,20 @@ var drawresult = function(){
         recv[r][0][2].kind !==undefined &&
         recv[r][0][2].kind==1){
         td1.innerHTML = "exist";
+        td1.setAttribute("class","tdexist");
       }else{
         td1.innerHTML = "not exist";
+        td1.setAttribute("class","tdnotexist");
       }
     }else{
       if(cantconnect[r]==true){
         td1.innerHTML = "can't connect";
+        td1.setAttribute("class","tdcantconnect");
+      }else{
+        td1.innerHTML = "no response";
+        td1.setAttribute("class","tdcantconnect");
       }
     }
-    td1.setAttribute("class","resulttd");
     tr.appendChild(td1);
   }
 }
