@@ -1,0 +1,19 @@
+body{font-family:Segoe UI;font-size:12pt;background-color:#DDDDDD}
+a{color:black;border-style:none;text-decoration:underline;}
+a:link{color:#000055;border-style:none;text-decoration:underline}
+a:visited{color:#0000CC;border-style:none;text-decoration:underline}
+a:hover{color:#8888CC;border-color:none;text-decoration:underline}
+address{text-align:right;font-style:normal;font-size:12pt}
+.myinput{border-style:solid;border-color:black;border-width:1px;color:black;font-family:ÇlÇr ÉSÉVÉbÉN;font-size:10pt;padding:2px;white-space:nowrap;}
+.example{border-style:none;border-color:black;border-width:1px;color:black;font-family:ÇlÇr ÉSÉVÉbÉN;font-size:10pt;padding:10px}
+.tdbutton{border-width:1px;border-style:solid;height:30px;width:30px}
+hr{border-style:solid}
+.console{font-family:MS Gothic;background-color:black}
+h1{margin-top:1pt;margin-bottom:1pt;}
+ul{margin-top:1pt;margin-bottom:1pt;}
+dt{font-weight:bold;font-size:12pt}
+li{font-size:12pt}
+dd{font-size:12pt}
+.noborder{border-style:none}
+.vcenter{vertical-align:center}
+.mybutton{width:200px}
