@@ -1,22 +1,45 @@
 var mypubkey="4c5d5379a066339c88f6e101e3edb1fbaee4ede3eea35ffc6f1c664b3a4383ee";
-var relay = "wss://relay.damus.io";
-var con;
+//var relay = "wss://relay.damus.io";
+var relay = "ws://localhost:6969";
+//var relay = "wss://relay.snort.social";
+var ws;
+var isopened = false;
+var recv=[];
 
 window.onload=function(){
-  con = new WebSocket(relay);
-  con.onmessage = recvmsg;
+  ws = new WebSocket(relay);
+  ws.onmessage = onmessage;
+  ws.onopen = onopen;
 }
 
 var procreq = function(){
   uu=getuuid();
-  con.send('["REQ","'+uu+'",{"authors":["'+mypubkey+'"],"kinds":[1],"limit":10}]');
-}
-var x;
-var recvmsg = function(m){
-  x=m;
-  f0.ta0.value += m.data;
+  noteid = "a0bfa1f3896d2f893cdbb80a339302911465abc700a65f64a2e622d4475fb712";
+  var msgobj=[
+    "REQ",
+    uu,
+    {
+      "ids"  :[noteid],
+      "kinds":[1],
+      "limit":10
+    }
+  ];
+  msgstr = JSON.stringify(msgobj);
+  
+  ws.send(msgstr);
 }
 
+var onopen = function(e){
+  isopened = true;
+  procreq();
+}
+var onmessage = function(m){
+  recv.push(JSON.parse(m.data));
+  print(m.data);
+}
+var print = function(m){
+  f0.ta0.value += m;
+}
 
 var getuuid = function(){
   let chars = "xxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx".split("");
