@@ -6,9 +6,18 @@
 </head>
 <body>
 <h1>nosana</h1>
-<form name=f0>
-<input name=req type=button value=req onclick="javascript:procreq();"/>
-<textarea name=ta0 rows=30 cols=200></textarea>
+<form name=form0>
+<table>
+<tr><td>note id:</td><td><input name=noteid type=text size=80 value="note15zl6ruufd5hcj0xmhq9r8yczjy2xt278qzn97e9zuc3dg36lkufq4326xp"/></td></tr>
+<tr><td>relays:</td><td><textarea name=relayliststr rows=10 cols=50></textarea></td></tr>
+</table>
+↓<br>
+<input name=req type=button value=search onclick="javascript:startcheckrelays();"/><br>
+↓<br>
+<table id=result>
+</table>
+<textarea name=debugout rows=30 cols=200></textarea>
 </form>
 <script type="text/javascript" src="./main.js"></script>
+<script type="text/javascript" src="./bech32.js"></script>
 </body></html>
