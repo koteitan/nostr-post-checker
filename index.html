@@ -6,9 +6,8 @@
 </head>
 <body>
 <h1>nostr: post existence checker</h1>
-<p>post id に調べたい post の id、relays に調べたいリレーサーバー名を入れると、その post がどのリレーに存在してどのリレーに存在しないかをチェックします。<br>
-search ボタンを押してからしばらくすると結果がテーブルになって出てくるので出るまで待ってください。
-</p>
+<p>post id に調べたい post の id、relays に調べたいリレーサーバー名を入れると、その post がどのリレーに存在してどのリレーに存在しないかをチェックします。</p>
+<p>Please put the post id you want to check. This client checks which relay the post exist on.</p>
 <form name=form0>
 <table>
 <tr><td>post id:</td><td><input name=noteid type=text size=80 value="note15zl6ruufd5hcj0xmhq9r8yczjy2xt278qzn97e9zuc3dg36lkufq4326xp"/></td></tr>
@@ -17,9 +16,16 @@ search ボタンを押してからしばらくすると結果がテーブルに�
 ↓<br>
 <input name=req type=button value=search onclick="javascript:startcheckrelays();"/><br>
 ↓<br>
-result:<br>
+result:<span id="time"></span><br>
 <table id=result>
 </table><br>
+<hr>
+<address>
+<u>nostr post existence checker version 1.1</u><br>
+programmed by <a href="https://iris.to/koteitan@koteitan.github.io">koteitan</a><br>
+Source code is on <a href="https://github.com/koteitan/nostrpostexist/">github</a><br>
+The program and the site is licensed by <a href="https://github.com/koteitan/nostrpostexist/blob/master/LICENSE.md">MIT License</a>.
+</address>
 debug:<br>
 <textarea name=debugout rows=30 cols=200></textarea>
 </form>
