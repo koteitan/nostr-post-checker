@@ -2,29 +2,26 @@ var defaultset=function(){};
 defaultset.mypubkey="4c5d5379a066339c88f6e101e3edb1fbaee4ede3eea35ffc6f1c664b3a4383ee";
 defaultset.noteid="note15zl6ruufd5hcj0xmhq9r8yczjy2xt278qzn97e9zuc3dg36lkufq4326xp";
 defaultset.relaylist=[
-  "wss://jiggytom.ddns.net",
-  "wss://eden.nostr.land",
-  "wss://nostr.fmt.wiz.biz",
+ // "ws://localhost:6969",
   "wss://relay.damus.io",
-  "wss://nostr-pub.wellorder.net",
-  "wss://relay.nostr.info",
-  "wss://offchain.pub",
-  "wss://nostr.onsats.org",
-  "wss://nos.lol",
-  "wss://brb.io",
   "wss://relay.snort.social",
+  "wss://nostr.h3z.jp/",
+  "wss://nos.lol",
   "wss://relay.current.fyi",
   "wss://nostr.relayer.se",
-  "wss://nostr.rewardsbunny.com/",
-  "wss://nostr.lnprivate.network/",
+  "wss://nostr-pub.wellorder.net",
+  "wss://offchain.pub",
   "wss://nostr.shawnyeager.net/",
   "wss://relay-jp.nostr.wirednet.jp/",
-  "wss://nostr.h3z.jp/",
   "wss://global.relay.red/",
   "wss://relay.nostr.vision/",
   "wss://nostr.zkid.social/",
+  "wss://relay.nostr.info",
   "wss://nostr.bingtech.tk/",
-  //  "ws://localhost:6969",
+  "wss://nostr.fmt.wiz.biz",
+  "wss://brb.io",
+  "wss://nostr.rewardsbunny.com/",
+  "wss://nostr.lnprivate.network/",
 ];
 if(false){
   defaultset.relaylist=[
@@ -37,12 +34,10 @@ if(false){
   ];
 }
 var relays;
-var currelay;
-var recv;
-var cantconnect;
 var notehex;
-
 var ws;
+var curms=-1;
+var nextms=-1;
 window.onload=function(){
   for(var r=0;r<defaultset.relaylist.length;r++){
     form0.relayliststr.value += defaultset.relaylist[r] + "\n";
@@ -50,128 +45,140 @@ window.onload=function(){
   form0.noteid.value = defaultset.noteid;
 }
 var startcheckrelays=function(){
-  currelay=0;
-  var table=document.getElementById("result");
   while(table.firstChild){
     table.removeChild(table.firstChild);
   }
   relaylist=form0.relayliststr.value.replace(/\n\n*/g,"\n").replace(/\n$/,"").split("\n");
   relays = relaylist.length;
   ws = new Array(relays); // ws[r]
-  recv = new Array(relays); // recv[r][n][0,1,2]
-  cantconnect = new Array(relays);
-  checknextrelay();
-}
-var isopen;
-var trialms;
-var gotmsg;
-var checknextrelay=function(){
-  var r = currelay;
-  isopen = false;
-  ws = new WebSocket(relaylist[r]);
-  ws.onerror = function(e){
-    cantconnect[currelay]=true;
-    currelay++;
-    if(currelay<relays){
-      checknextrelay();
-    }else{
-      drawresult();
+  for(var r=0;r<relays;r++){
+    ws[r] = new WebSocket(relaylist[r]);
+    ws[r].uuid = genuuid();
+    ws[r].r = r;
+    ws[r].status = "idle";
+    ws[r].recv = [];
+    ws[r].onerror = function(e){
+      ws[this.r].status = "error";
     }
+    ws[r].onopen = function(e){
+      var r = this.r;
+      print("ws["+relaylist[r]+"] was opened.\n");
+      notehex = key2hex(form0.noteid.value);
+      var sendobj=[
+        "REQ",
+        ws[r].uuid,
+        {"ids":[notehex]}
+      ];
+      sendstr = JSON.stringify(sendobj);
+      ws[r].send(sendstr);
+      print("sent '"+sendstr+"'\n");
+      ws[r].status = "sent";
+    };
+    ws[r].onmessage = function(m){
+      var r=this.r;
+      ws[r].recv.push(JSON.parse(m.data));
+      print("received message from ws["+relaylist[r]+"]='"+m.data+"'\n");
+      ws[r].close();
+      ws[r].status = "received";
+      drawresult(r);
+    };
   }
-  ws.onopen = function(e){
-    print("onopen for "+currelay+"\n");
-    uuid=getuuid();
-    notehex = key2hex(form0.noteid.value);
-//      notehex = "a0bfa1f3896d2f893cdbb80a339302911465abc700a65f64a2e622d447";
-    var sendobj=[
-      "REQ",
-      uuid,
-      {
-        "ids"  :[notehex],
-//        "authors"  :[mypubkey],
-//        "kinds":[1],
-//        "limit":10
-      }
-    ];
-    sendstr = JSON.stringify(sendobj);
-    gotmsg = false;
-    trialms = 0;
-    print("currelay="+currelay+"\n");
-    print("sent message = "+sendstr+"\n");
-    recv[currelay]=[];
-    ws.send(sendstr);
-    isopen = true;
-  };
-  ws.onmessage = function(m){
-    recv[currelay].push(JSON.parse(m.data));
-    print("relay = "+relaylist[currelay]+"\n");
-    print("received message = "+m.data+"\n");
-    ws.close();
-    gotmsg = true;
-  };
-  trialms = 0;
-  setTimeout(checkmsg, 100);
+  preparetable();
+  curms = 0;
+  nextms = 200;
+  setTimeout(checkmsg, nextms);
+  timer=setInterval(checktime, nextms);
+}
+var timer;
+var timeout=60000;
+var checktime=function(){
+  if(curms!=-1 && nextms!=-1){
+    document.getElementById("time").innerHTML = " left "+Math.floor((timeout-curms)/1000)+" seconds until timeout";
+  }
 }
 var checkmsg = function(){
-  if(!gotmsg){
-    trialms+=100;
-//    print("trialms="+trialms+"\n");
-    if(trialms < 5000){
-      setTimeout(checkmsg, 100);
-      return;
-    }else{
-      print("timeout\n");
+  var yet=false;
+  for(var r=0;r<relays;r++){
+    if(ws[r].status=="idle" || ws[r].status=="sent"){
+      yet=true;
     }
   }
-  gotmsg=false;
-  currelay++;
-//  print("currelay="+currelay+"\n");
-  if(currelay==relays){
-    drawresult();
-  }else{
-    checknextrelay();
+  if(yet){
+    curms += nextms;
+    print("curms="+curms+"\n");
+    if(curms+nextms<timeout){
+      setTimeout(checkmsg, nextms);
+      return;
+    }
   }
+  clearInterval(timer);
+  curms = -1;
+  nextms = -1;
+  drawresultall();
 }
-var drawresult = function(){
-  var table = document.getElementById("result");
+var drawresultall=function(){
+  for(var r=0;r<relays;r++)drawresult(r);
+}
+var table = document.getElementById("result");
+var preparetable = function(){
   for(var r=0;r<relays;r++){
     var tr = document.createElement("tr");
     table.appendChild(tr);
     var td0 = document.createElement("td");
     td0.innerHTML = relaylist[r];
-    td0.setAttribute("class","resulttd");
+    td0.setAttribute("class","tdrelay");
     tr.appendChild(td0);
     var td1 = document.createElement("td");
-    if(recv[r] instanceof Array && recv[r][0] instanceof Array){
-      if(
-        recv[r][0][0]=="EVENT" && 
-        recv[r][0][2].id !==undefined &&
-        recv[r][0][2].id==notehex &&
-        recv[r][0][2].kind !==undefined &&
-        recv[r][0][2].kind==1){
-        td1.innerHTML = "exist";
-        td1.setAttribute("class","tdexist");
-      }else{
-        td1.innerHTML = "not exist";
-        td1.setAttribute("class","tdnotexist");
-      }
-    }else{
-      if(cantconnect[r]==true){
-        td1.innerHTML = "can't connect";
-        td1.setAttribute("class","tdcantconnect");
-      }else{
-        td1.innerHTML = "no response";
-        td1.setAttribute("class","tdcantconnect");
-      }
-    }
+    td1.innerHTML = "connecting...";
+    td1.setAttribute("class","tdcon");
     tr.appendChild(td1);
+    ws[r].td = td1;
   }
 }
+var drawresult = function(r){
+  var td1 = ws[r].td;
+  var recv = ws[r].recv;
+  switch(ws[r].status){
+    case "idle":
+      td1.innerHTML = "can't open";
+      td1.setAttribute("class","tderror");
+      break;
+    case "error":
+      td1.innerHTML = "error to open";
+      td1.setAttribute("class","tderror");
+      break;
+    case "sent":
+      td1.innerHTML = "no reply";
+      td1.setAttribute("class","tderror");
+      break;
+    case "received":
+    default:
+      if(recv instanceof Array && recv[0] instanceof Array){
+        if(
+          recv[0][0]=="EVENT" && 
+          recv[0][2].id !==undefined &&
+          recv[0][2].id==notehex &&
+          recv[0][2].kind !==undefined &&
+          recv[0][2].kind==1){
+          td1.innerHTML = "exist";
+          td1.setAttribute("class","tdexist");
+        }else{
+          td1.innerHTML = "not exist";
+          td1.setAttribute("class","tdnotexist");
+        }
+      }else{
+        td1.innerHTML = "empty reply";
+        td1.setAttribute("class","tderror");
+        break;
+      }
+  }
+}
+
 var print = function(m){
   form0.debugout.value += m;
 }
 
-var getuuid = function(){
+var genuuid = function(){
   let chars = "xxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx".split("");
   for (let i = 0, len = chars.length; i < len; i++) {
     switch (chars[i]) {
