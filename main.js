@@ -67,7 +67,7 @@ var startcheckrelays=function(){
       var sendobj=[
         "REQ",
         ws[r].uuid,
-        {"ids":[notehex]}
+        {"ids":[notehex],"kinds":[parseInt(form0.kind.value)]}
       ];
       sendstr = JSON.stringify(sendobj);
       ws[r].send(sendstr);
@@ -159,7 +159,7 @@ var drawresult = function(r){
           recv[0][2].id !==undefined &&
           recv[0][2].id==notehex &&
           recv[0][2].kind !==undefined &&
-          recv[0][2].kind==1){
+          recv[0][2].kind==parseInt(form0.kind.value)){
           td1.innerHTML = "exist";
           td1.setAttribute("class","tdexist");
         }else{
