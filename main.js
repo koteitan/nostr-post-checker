@@ -46,40 +46,69 @@ var notehex;
 var ws;
 var curms=-1;
 var nextms=-1;
-var filterId;
+var filter;
+var iserror;
+var uuid;
 window.onload=function(){
+  uuid = genuuid();
   for(var r=0;r<defaultset.relaylist.length;r++){
     form0.relayliststr.value += defaultset.relaylist[r] + "\n";
   }
   form0.noteid.value = defaultset.noteid;
 }
 var startcheckrelays=function(){
+  iserror = false;
+  /* check id */
+  if(form0.noteid.value.substr(0,4)=="note"){
+    filter=["ids","id"];
+  }else if(form0.noteid.value.substr(0,4)=="npub"){
+    filter=["authors","pubkey"]
+  }else{
+    /* invalid id */
+    iserror = true;
+    document.getElementById("time").innerHTML = "Invalid id. id should start from npub or note."
+  }
   while(table.firstChild){
     table.removeChild(table.firstChild);
   }
-  relaylist=form0.relayliststr.value.replace(/\n\n*/g,"\n").replace(/\n$/,"").split("\n");
+  relaylist = form0.relayliststr.value.replace(/\n\n*/g,"\n").replace(/\n$/,"").split("\n");
   relays = relaylist.length;
+  if(iserror){
+    ws = new Array(relays); // ws[r]
+    for(var r=0;r<relays;r++){
+      ws[r] = new Object;
+    }
+    preparetable();
+    for(var r=0;r<relays;r++){
+      var td1 = ws[r].td;
+      var recv = ws[r].recv;
+      td1.innerHTML = "id is invalid";
+      td1.setAttribute("class","tderror");
+    }
+    return;
+  }
   ws = new Array(relays); // ws[r]
   for(var r=0;r<relays;r++){
     ws[r] = new WebSocket(relaylist[r]);
-    ws[r].uuid = genuuid();
+    ws[r].uuid = uuid;
     ws[r].r = r;
     ws[r].status = "idle";
     ws[r].recv = [];
     ws[r].onerror = function(e){
       ws[this.r].status = "error";
     }
+    ws[r].onmessage = function(m){
+      var r=this.r;
+      ws[r].recv.push(JSON.parse(m.data));
+      print("received message from ws["+relaylist[r]+"]='"+m.data+"'\n");
+      ws[r].close();
+      ws[r].status = "received";
+      drawresult(r);
+    };
     ws[r].onopen = function(e){
       var r = this.r;
       print("ws["+relaylist[r]+"] was opened.\n");
       notehex = key2hex(form0.noteid.value);
-      if(form0.noteid.value[1]=="o"){
-        filter=["ids","id"];
-      }else if(form0.noteid.value[1]=="p"){
-        filter=["authors","pubkey"]
-      }else{
-        console.log("無効な入力かも")
-      }
       var eventFilter = {[filter[0]]:[notehex],"kinds":[parseInt(form0.kind.value)]};
 
       var sendobj=[
@@ -92,14 +121,6 @@ var startcheckrelays=function(){
       print("sent '"+sendstr+"'\n");
       ws[r].status = "sent";
     };
-    ws[r].onmessage = function(m){
-      var r=this.r;
-      ws[r].recv.push(JSON.parse(m.data));
-      print("received message from ws["+relaylist[r]+"]='"+m.data+"'\n");
-      ws[r].close();
-      ws[r].status = "received";
-      drawresult(r);
-    };
   }
   preparetable();
   curms = 0;
@@ -110,8 +131,10 @@ var startcheckrelays=function(){
 var timer;
 var timeout=60000;
 var checktime=function(){
-  if(curms!=-1 && nextms!=-1){
-    document.getElementById("time").innerHTML = " left "+Math.floor((timeout-curms)/1000)+" seconds until timeout";
+  if(!iserror){
+    if(curms!=-1 && nextms!=-1){
+      document.getElementById("time").innerHTML = " left "+Math.floor((timeout-curms)/1000)+" seconds until timeout";
+    }
   }
 }
 var checkmsg = function(){
