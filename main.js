@@ -46,6 +46,7 @@ var notehex;
 var ws;
 var curms=-1;
 var nextms=-1;
+var filterId;
 window.onload=function(){
   for(var r=0;r<defaultset.relaylist.length;r++){
     form0.relayliststr.value += defaultset.relaylist[r] + "\n";
@@ -72,10 +73,19 @@ var startcheckrelays=function(){
       var r = this.r;
       print("ws["+relaylist[r]+"] was opened.\n");
       notehex = key2hex(form0.noteid.value);
+      if(form0.noteid.value[1]=="o"){
+        filter=["ids","id"];
+      }else if(form0.noteid.value[1]=="p"){
+        filter=["authors","pubkey"]
+      }else{
+        console.log("無効な入力かも")
+      }
+      var eventFilter = {[filter[0]]:[notehex],"kinds":[parseInt(form0.kind.value)]};
+
       var sendobj=[
         "REQ",
         ws[r].uuid,
-        {"ids":[notehex],"kinds":[parseInt(form0.kind.value)]}
+        eventFilter  
       ];
       sendstr = JSON.stringify(sendobj);
       ws[r].send(sendstr);
@@ -164,8 +174,8 @@ var drawresult = function(r){
       if(recv instanceof Array && recv[0] instanceof Array){
         if(
           recv[0][0]=="EVENT" && 
-          recv[0][2].id !==undefined &&
-          recv[0][2].id==notehex &&
+          recv[0][2][filter[1]] !==undefined &&
+          recv[0][2][filter[1]]==notehex &&
           recv[0][2].kind !==undefined &&
           recv[0][2].kind==parseInt(form0.kind.value)){
           td1.innerHTML = "exist";
