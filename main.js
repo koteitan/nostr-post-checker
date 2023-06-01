@@ -1,6 +1,6 @@
 var defaultset=function(){};
 defaultset.mypubkey="4c5d5379a066339c88f6e101e3edb1fbaee4ede3eea35ffc6f1c664b3a4383ee";
-defaultset.noteid="note15zl6ruufd5hcj0xmhq9r8yczjy2xt278qzn97e9zuc3dg36lkufq4326xp";
+defaultset.noteid="note19a0quw4eewnd8r6fe0and8h86g60hzg6dv95dlz979043rqzagsqcl2y0j";
 defaultset.relaylist=[
  // "ws://localhost:6969",
   "wss://relay.snort.social",
