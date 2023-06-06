@@ -8,3 +8,5 @@ this site checks the post (=note) exists on the relays or not.
   - https://koteitan.github.io/nostr-post-checker
 - about nostr protocol:
   - https://github.com/nostr-protocol/nostr
+- library
+  - https://github.com/nbd-wtf/nostr-tools

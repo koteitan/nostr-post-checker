@@ -59,14 +59,14 @@ window.onload=function(){
 var startcheckrelays=function(){
   iserror = false;
   /* check id */
-  if(form0.noteid.value.substr(0,4)=="note"){
+  if(form0.noteid.value.substr(0,4)=="note" || form0.noteid.value.substr(0, 6) == "nevent"){
     filter=["ids","id"];
-  }else if(form0.noteid.value.substr(0,4)=="npub"){
+  }else if(form0.noteid.value.substr(0,4)=="npub" || form0.noteid.value.substr(0, 8) == "nprofile"){
     filter=["authors","pubkey"]
   }else{
     /* invalid id */
     iserror = true;
-    document.getElementById("time").innerHTML = "Invalid id. id should start from npub or note."
+    document.getElementById("time").innerHTML = "Invalid id. id should start from npub or note or nevent."
   }
   while(table.firstChild){
     table.removeChild(table.firstChild);
@@ -108,7 +108,18 @@ var startcheckrelays=function(){
     ws[r].onopen = function(e){
       var r = this.r;
       print("ws["+relaylist[r]+"] was opened.\n");
-      notehex = key2hex(form0.noteid.value);
+      noteObj = window.NostrTools.nip19.decode(form0.noteid.value);
+
+      if(noteObj.type == "note" || noteObj.type == "npub"){
+        notehex = noteObj.data;
+      } else if(noteObj.type == "nevent"){
+        notehex = noteObj.data.id;
+      } else if(noteObj.type == "nprofile"){
+        notehex = noteObj.data.pubkey;
+      }
+      //notehex = key2hex(form0.noteid.value);
+      console.log(notehex);
+
       var eventFilter = {[filter[0]]:[notehex],"kinds":[parseInt(form0.kind.value)]};
 
       var sendobj=[
@@ -234,24 +245,24 @@ var genuuid = function(){
   return chars.join("");
 }
 
-var key2hex = function(key){
-  const decoded = bech32.decode(key);
-	const bytes = fromWords(decoded.words);
-	return hex_encode(bytes);
-}
-var hex_encode = function(buf){
-	str = ""
-	for (let i = 0; i < buf.length; i++) {
-		const c = buf[i]
-		str += hex_char(c >> 4)
-		str += hex_char(c & 0xF)
-	}
-	return str
-}
-function hex_char(val)
-{
-	if (val < 10)
-		return String.fromCharCode(48 + val)
-	if (val < 16)
-		return String.fromCharCode(97 + val - 10)
-}
+// var key2hex = function(key){
+//   const decoded = bech32.decode(key);
+// 	const bytes = fromWords(decoded.words);
+// 	return hex_encode(bytes);
+// }
+// var hex_encode = function(buf){
+// 	str = ""
+// 	for (let i = 0; i < buf.length; i++) {
+// 		const c = buf[i]
+// 		str += hex_char(c >> 4)
+// 		str += hex_char(c & 0xF)
+// 	}
+// 	return str
+// }
+// function hex_char(val)
+// {
+// 	if (val < 10)
+// 		return String.fromCharCode(48 + val)
+// 	if (val < 16)
+// 		return String.fromCharCode(97 + val - 10)
+// }
