@@ -1,37 +1,30 @@
 body {
-    font-family: -apple-system,BlinkMacSystemFont,Helvetica Neue,Segoe UI,Hiragino Kaku Gothic ProN,Hiragino Sans,ヒラギノ角ゴ ProN W3,Arial,メイリオ,Meiryo,sans-serif;
-    font-size: 12pt; /* increased font size for better readability */
+    font-family: 
+    -apple-system, BlinkMacSystemFont, Helvetica Neue, Segoe UI, Hiragino Kaku Gothic ProN, Hiragino Sans, ヒラギノ角ゴ ProN W3, Arial, メイリオ, Meiryo, sans-serif;
     background-color: #DDDDDD;
 }
 
 a {
     color: black;
-    border-style: none;
     text-decoration: underline;
 }
 
 a:link {
     color: #000055;
-    border-style: none;
-    text-decoration: underline;
 }
 
 a:visited {
     color: #0000CC;
-    border-style: none;
-    text-decoration: underline;
 }
 
 a:hover {
     color: #8888CC;
-    border-color: none;
-    text-decoration: underline;
 }
 
 address {
     text-align: right;
     font-style: normal;
-    font-size: 10pt; /* increased font size for better readability */
+    font-size: 1rem; /* increased font size for better readability */
 }
 
 .myinput {
@@ -39,7 +32,6 @@ address {
     border-color: black;
     border-width: 1px;
     color: black;
-    font-family: ＭＳ ゴシック;
     font-size: 12pt; /* increased font size for better readability */
     padding: 2px;
     white-space: nowrap;
@@ -50,7 +42,6 @@ address {
     border-color: black;
     border-width: 1px;
     color: black;
-    font-family: ＭＳ ゴシック;
     font-size: 12pt; /* increased font size for better readability */
     padding: 10px;
 }
@@ -60,10 +51,12 @@ address {
 .tderror,
 .tdexist,
 .tdnotexist {
-    border-width: 1px;
+    border-width: 0.01rem;
     border-style: solid;
-    height: 30px;
-    width: 100%; /* changed to percentage */
+    height: 1.8rem;
+    width: 98%; /* changed to percentage */
+    padding-left: 0.2rem;
+    vertical-align: middle;
 }
 
 .tdcon {
@@ -72,26 +65,19 @@ address {
 
 .tdrelay {
     background-color: #cccccc;
-    min-width: 200px;
-    max-width: 100%;
 }
 
 .tderror {
     background-color: rgb(160, 160, 160);
     min-width: 100px;
-    max-width: 100%;
 }
 
 .tdexist {
     background-color: rgb(120, 255, 120);
-    min-width: 100px;
-    max-width: 100%;
 }
 
 .tdnotexist {
     background-color: rgb(255, 120, 120);
-    min-width: 100px;
-    max-width: 100%;
 }
 
 .tdbutton {
@@ -111,17 +97,16 @@ hr {
 }
 
 h1 {
-    
-    margin-bottom: 0.8em;
+    margin-bottom: 2rem;
 }
 
 ul {
-    margin-top: -5pt;
-    margin-bottom: 15pt;
+    margin-top: -0.5rem;
+    margin-bottom: 1.5rem;
 }
 
 dl {
-    margin-bottom: 15pt;
+    margin-bottom: 2rem;
 }
 
 dt {
@@ -131,7 +116,7 @@ dt {
 
 li,
 dd {
-    font-size: 11pt; /* increased font size for better readability */
+    font-size: 0.9rem; /* increased font size for better readability */
 }
 
 .noborder {
@@ -148,9 +133,15 @@ dd {
 
 textarea, 
 input {
-    font-size: 12pt;
+    font-size: 1rem;
 }
 
 button{
-    font-size: 12pt;
+    font-size: 1rem;
+}
+
+.noteid,
+.kind,
+.relayliststr {
+    width: 98%;
 }
