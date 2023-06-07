@@ -8,31 +8,33 @@
         <link rel="stylesheet" type="text/css" href="style.css">
     </head>
     <body>
-        <h1>nostr: post checker</h1>
-        <p>そのイベントがどのリレーサーバーに存在していて、どのリレーサーバーに存在していないかを確認できます。</p>
-        <ul>
-            <li>id ボックスに調べたい「note1～」、「nevent1～」や「npub1～」、「nprofile1～」を入力</li>
-            <li>kind ボックスに調べたいkindの「数字」を入力</li>
-            <li>relays ボックスに調べたい「リレーアドレス」を入力</li>
-        </ul>
-        <p>You can check which relay servers the event exists on and which do not.</p>
-        <ul>
-            <li>Enter the "note1~", "nevent1~", "npub1~" or "nprofile1~" to be checked in the id box.</li>
-            <li>Enter the "number" of the kind you want to check in the kind box.</li>
-            <li>Enter the "relay address" to be checked in the relays box.</li>
-        </ul>
+        <dl>
+            <h1>nostr: post checker</h1>
+            <p>イベントがどのリレーに存在し、どのリレーに存在していないかを確認できます</p>
+            <ul>
+                <li>id ボックスに調べたい「note1～」「nevent1～」や「npub1～」「nprofile1～」を入力</li>
+                <li>kind ボックスに調べたいkindの「数字」を入力</li>
+                <li>relays ボックスに調べたい「リレーアドレス」を入力</li>
+            </ul>
+            <p>You can check which relay servers the event exists on and which do not.</p>
+            <ul>
+                <li>Enter the "note1~", "nevent1~", "npub1~" or "nprofile1~" to be checked in the id box.</li>
+                <li>Enter the "number" of the kind you want to check in the kind box.</li>
+                <li>Enter the "relay address" to be checked in the relays box.</li>
+            </ul>
+        </dl>
         <form name=form0>
             <div>
                 <label for="noteid">id:</label>
-                <input name="noteid" type="text" style="width: 100%;" value="note15zl6ruufd5hcj0xmhq9r8yczjy2xt278qzn97e9zuc3dg36lkufq4326xp"/>
+                <input id="noteid" name="noteid" type="text" style="width: 100%;" value="note15zl6ruufd5hcj0xmhq9r8yczjy2xt278qzn97e9zuc3dg36lkufq4326xp"/>
             </div>
             <div>
                 <label for="kind">kind:</label>
-                <input name="kind" type="text" style="width: 100%;" value="1"/>
+                <input id="kind" name="kind" type="text" style="width: 100%;" value="1"/>
             </div>
             <div>
                 <label for="relayliststr">relays:</label>
-                <textarea name="relayliststr" style="width: 100%;" rows="10"></textarea>
+                <textarea id="relayliststr" name="relayliststr" style="width: 100%;" rows="10"></textarea>
             </div>
             <button name="req" type="button" onclick="javascript:startcheckrelays();">search</button>
             <p>result:<span id="time"></span></p>
