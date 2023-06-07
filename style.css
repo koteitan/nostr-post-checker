@@ -24,7 +24,7 @@ a:hover {
 address {
     text-align: right;
     font-style: normal;
-    font-size: 1rem; /* increased font size for better readability */
+    font-size: 0.9rem; /* increased font size for better readability */
 }
 
 .myinput {
@@ -100,13 +100,13 @@ h1 {
     margin-bottom: 2rem;
 }
 
-ul {
-    margin-top: -0.5rem;
+dl {
     margin-bottom: 1.5rem;
 }
 
-dl {
-    margin-bottom: 2rem;
+ul {
+    margin-top: -0.8rem;
+    margin-bottom: 0.5rem;
 }
 
 dt {
@@ -117,6 +117,7 @@ dt {
 li,
 dd {
     font-size: 0.9rem; /* increased font size for better readability */
+    padding: 0.05rem 0;
 }
 
 .noborder {
@@ -142,6 +143,7 @@ button{
 
 .noteid,
 .kind,
-.relayliststr {
+.relayliststr,
+.debugout {
     width: 98%;
 }
