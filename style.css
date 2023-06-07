@@ -1,24 +1,149 @@
-body{font-family:Segoe UI;font-size:12pt;background-color:#DDDDDD}
-a{color:black;border-style:none;text-decoration:underline;}
-a:link{color:#000055;border-style:none;text-decoration:underline}
-a:visited{color:#0000CC;border-style:none;text-decoration:underline}
-a:hover{color:#8888CC;border-color:none;text-decoration:underline}
-address{text-align:right;font-style:normal;font-size:12pt}
-.myinput{border-style:solid;border-color:black;border-width:1px;color:black;font-family:ＭＳ ゴシック;font-size:10pt;padding:2px;white-space:nowrap;}
-.example{border-style:none;border-color:black;border-width:1px;color:black;font-family:ＭＳ ゴシック;font-size:10pt;padding:10px}
-.tdcon  {border-width:1px;border-style:solid;height:30px;width:300px;background-color:#ffffff}
-.tdrelay{border-width:1px;border-style:solid;height:30px;width:300px;background-color:#cccccc}
-.tderror{border-width:1px;border-style:solid;height:30px;width:300px;background-color:#888888}
-.tdexist{border-width:1px;border-style:solid;height:30px;width:300px;background-color:green}
-.tdnotexist{border-width:1px;border-style:solid;height:30px;width:300px;background-color:red}
-.tdbutton{border-width:1px;border-style:solid;height:30px;width:30px}
-hr{border-style:solid}
-.console{font-family:MS Gothic;background-color:black}
-h1{margin-top:1pt;margin-bottom:1pt;}
-ul{margin-top:1pt;margin-bottom:1pt;}
-dt{font-weight:bold;font-size:12pt}
-li{font-size:12pt}
-dd{font-size:12pt}
-.noborder{border-style:none}
-.vcenter{vertical-align:center}
-.mybutton{width:200px}
+body {
+    font-family: 
+    -apple-system, BlinkMacSystemFont, Helvetica Neue, Segoe UI, Hiragino Kaku Gothic ProN, Hiragino Sans, ヒラギノ角ゴ ProN W3, Arial, メイリオ, Meiryo, sans-serif;
+    background-color: #DDDDDD;
+}
+
+a {
+    color: black;
+    text-decoration: underline;
+}
+
+a:link {
+    color: #000055;
+}
+
+a:visited {
+    color: #0000CC;
+}
+
+a:hover {
+    color: #8888CC;
+}
+
+address {
+    text-align: right;
+    font-style: normal;
+    font-size: 0.9rem; /* increased font size for better readability */
+}
+
+.myinput {
+    border-style: solid;
+    border-color: black;
+    border-width: 1px;
+    color: black;
+    font-size: 12pt; /* increased font size for better readability */
+    padding: 2px;
+    white-space: nowrap;
+}
+
+.example {
+    border-style: none;
+    border-color: black;
+    border-width: 1px;
+    color: black;
+    font-size: 12pt; /* increased font size for better readability */
+    padding: 10px;
+}
+
+.tdcon,
+.tdrelay,
+.tderror,
+.tdexist,
+.tdnotexist {
+    border-width: 0.01rem;
+    border-style: solid;
+    height: 1.8rem;
+    width: 98%; /* changed to percentage */
+    padding-left: 0.2rem;
+    vertical-align: middle;
+}
+
+.tdcon {
+    background-color: #ffffff;
+}
+
+.tdrelay {
+    background-color: #cccccc;
+}
+
+.tderror {
+    background-color: rgb(160, 160, 160);
+    min-width: 100px;
+}
+
+.tdexist {
+    background-color: rgb(120, 255, 120);
+}
+
+.tdnotexist {
+    background-color: rgb(255, 120, 120);
+}
+
+.tdbutton {
+    border-width: 1px;
+    border-style: solid;
+    height: 30px;
+    width: 100%; /* changed to percentage */
+}
+
+hr {
+    border-style: solid;
+}
+
+.console {
+    font-family: MS Gothic;
+    background-color: black;
+}
+
+h1 {
+    margin-bottom: 2rem;
+}
+
+dl {
+    margin-bottom: 1.5rem;
+}
+
+ul {
+    margin-top: -0.8rem;
+    margin-bottom: 0.5rem;
+}
+
+dt {
+    font-weight: bold;
+    font-size: 14pt; /* increased font size for better readability */
+}
+
+li,
+dd {
+    font-size: 0.9rem; /* increased font size for better readability */
+    padding: 0.05rem 0;
+}
+
+.noborder {
+    border-style: none;
+}
+
+.vcenter {
+    vertical-align: center;
+}
+
+.mybutton {
+    width: 100%; /* changed to percentage */
+}
+
+textarea, 
+input {
+    font-size: 1rem;
+}
+
+button{
+    font-size: 1rem;
+}
+
+.noteid,
+.kind,
+.relayliststr,
+.debugout {
+    width: 98%;
+}
