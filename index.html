@@ -6,11 +6,22 @@
 </head>
 <body>
 <h1>nostr: post checker</h1>
-<p>id に調べたい note id または pubkey、relays に調べたいリレーサーバー名を入れると、その event がどのリレーに存在してどのリレーに存在しないかをチェックします。</p>
-<p>Please put the note id or pubkey you want to check into id box. This client checks which relay the event exist on.</p>
+<p>そのイベントがどのリレーサーバーに存在していて、どのリレーサーバーに存在していないかを確認できます。</p>
+<ul>
+  <li>id ボックスに調べたい「note1～」、「nevent1～」や「npub1～」、「nprofile1～」を入力</li>
+  <li>kind ボックスに調べたいkindの「数字」を入力</li>
+  <li>relays ボックスに調べたい「リレーアドレス」を入力</li>
+</ul>
+<p>You can check which relay servers the event exists on and which do not.</p>
+<ul>
+  <li>Enter the "note1~", "nevent1~", "npub1~" or "nprofile1~" to be checked in the id box.</li>
+  <li>Enter the "number" of the kind you want to check in the kind box.</li>
+  <li>Enter the "relay address" to be checked in the relays box.</li>
+</ul>
+<p></p>
 <form name=form0>
 <table>
-  <tr><td>id:</td><td><input name=noteid type=text size=80 value="note19a0quw4eewnd8r6fe0and8h86g60hzg6dv95dlz979043rqzagsqcl2y0j"/></td><td>kind</td><td><input name=kind type=text size=10 value="1"/></td></tr>
+  <tr><td>id:</td><td><input name=noteid type=text size=80 value="note15zl6ruufd5hcj0xmhq9r8yczjy2xt278qzn97e9zuc3dg36lkufq4326xp"/></td><td>kind</td><td><input name=kind type=text size=10 value="1"/></td></tr>
 <tr><td>relays:</td><td><textarea name=relayliststr rows=10 cols=50></textarea></td></tr>
 </table>
 ↓<br>
@@ -21,7 +32,7 @@ result:<span id="time"></span><br>
 </table><br>
 <hr>
 <address>
-<u>nostr post checker version 1.3</u><br>
+<u>nostr post checker version 1.4</u><br>
 programmed by <a href="https://iris.to/koteitan">koteitan</a><br>
 Source code is on <a href="https://github.com/koteitan/nostr-post-checker">github</a><br>
 The program and the site is licensed by <a href="https://github.com/koteitan/nostr-post-checker/blob/master/LICENSE.md">MIT License</a>.
