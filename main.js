@@ -62,9 +62,9 @@ var startcheckrelays=function(){
   /* check id */
   let n;
   if(form0.noteid.value.substr(0, 6) == "nostr:"){
-    n = 6
+    n = 6;
   }else{
-    n = 0
+    n = 0;
   }
   if(form0.noteid.value.substr(n, 4) == "note" || form0.noteid.value.substr(n, 6) == "nevent"){
     filter=["ids","id"];
