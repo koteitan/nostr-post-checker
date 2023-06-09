@@ -58,19 +58,28 @@ window.onload=function(){
 }
 var startcheckrelays=function(){
   iserror = false;
+
   /* check id */
-  if(form0.noteid.value.substr(0,4)=="note" || form0.noteid.value.substr(0, 6) == "nevent"){
+  let n;
+  if(form0.noteid.value.substr(0, 6) == "nostr:"){
+    n = 6;
+  }else{
+    n = 0;
+  }
+  if(form0.noteid.value.substr(n, 4) == "note" || form0.noteid.value.substr(n, 6) == "nevent"){
     filter=["ids","id"];
-  }else if(form0.noteid.value.substr(0,4)=="npub" || form0.noteid.value.substr(0, 8) == "nprofile"){
+  }else if(form0.noteid.value.substr(n, 4) == "npub" || form0.noteid.value.substr(n, 8) == "nprofile"){
     filter=["authors","pubkey"]
   }else{
     /* invalid id */
     iserror = true;
     document.getElementById("time").innerHTML = "Invalid id. id should start from npub or nprofile or note or nevent."
   }
+
   while(table.firstChild){
     table.removeChild(table.firstChild);
   }
+
   relaylist = form0.relayliststr.value.replace(/\n\n*/g,"\n").replace(/\n$/,"").split("\n");
   relays = relaylist.length;
   if(iserror){
@@ -108,14 +117,35 @@ var startcheckrelays=function(){
     ws[r].onopen = function(e){
       var r = this.r;
       print("ws["+relaylist[r]+"] was opened.\n");
-      noteObj = window.NostrTools.nip19.decode(form0.noteid.value);
 
-      if(noteObj.type == "note" || noteObj.type == "npub"){
-        notehex = noteObj.data;
-      } else if(noteObj.type == "nevent"){
-        notehex = noteObj.data.id;
-      } else if(noteObj.type == "nprofile"){
-        notehex = noteObj.data.pubkey;
+      if(form0.noteid.value.substr(0, 6) == "nostr:"){
+        noteObj = window.NostrTools.nip21.parse(form0.noteid.value);
+        switch(noteObj.decoded.type){
+          case "note":
+          case "npub":
+            notehex = noteObj.decoded.data;
+            break;
+          case "nevent":
+            notehex = noteObj.decoded.data.id;
+            break;
+          case "nprofile":
+            notehex = noteObj.decoded.data.pubkey;
+            break;
+        }
+      }else{
+        noteObj = window.NostrTools.nip19.decode(form0.noteid.value);
+        switch(noteObj.type){
+          case "note":
+          case "npub":
+            notehex = noteObj.data;
+            break;
+          case "nevent":
+            notehex = noteObj.data.id;
+            break;
+          case "nprofile":
+            notehex = noteObj.data.pubkey;
+            break;
+        }
       }
 
       var eventFilter = {[filter[0]]:[notehex],"kinds":[parseInt(form0.kind.value)]};
