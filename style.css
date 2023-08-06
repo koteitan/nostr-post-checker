@@ -141,9 +141,12 @@ button{
     font-size: 1rem;
 }
 
-.noteid,
+.eid,
 .kind,
 .relayliststr,
 .debugout {
     width: 98%;
+}
+.debug{
+  display:none
 }

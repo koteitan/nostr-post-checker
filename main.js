@@ -1,6 +1,6 @@
 var defaultset=function(){};
 defaultset.mypubkey="4c5d5379a066339c88f6e101e3edb1fbaee4ede3eea35ffc6f1c664b3a4383ee";
-defaultset.noteid="note15zl6ruufd5hcj0xmhq9r8yczjy2xt278qzn97e9zuc3dg36lkufq4326xp";
+defaultset.eid="note15zl6ruufd5hcj0xmhq9r8yczjy2xt278qzn97e9zuc3dg36lkufq4326xp";
 defaultset.relaylist=[
  // "ws://localhost:6969",
   "wss://relay.snort.social",
@@ -54,26 +54,37 @@ window.onload=function(){
   for(var r=0;r<defaultset.relaylist.length;r++){
     form0.relayliststr.value += defaultset.relaylist[r] + "\n";
   }
-  form0.noteid.value = defaultset.noteid;
+  form0.eid.value = defaultset.eid;
   form0.kind.value = 1;
-  parsequery();
+  var autostart = parsequery();
+  if(autostart)startcheckrelays();
 }
 var parsequery=function(){
   const sp = new URLSearchParams(window.location.search);
-  if(sp.has('noteid')){
-    form0.noteid.value = sp.get('noteid');
+  var ready = true;
+  if(sp.has('eid')){
+    form0.eid.value = sp.get('eid');
+  }else if(sp.has('noteid')){ // support old version
+    form0.eid.value = sp.get('noteid');
+  }else{
+    ready=false;
   }
   if(sp.has('kind')){
     form0.kind.value = sp.get('kind');
+  }else{
+    ready=false;
   }
   if(sp.has('relay')){
     form0.relayliststr.value = sp.get('relay').replace(/;/g,"\n");
+  }else{
+    ready=false;
   }
+  return ready;
 }
 var prevurl = "";
 var makequery=function(){
   var query="";
-  query += "noteid=" + form0.noteid.value;
+  query += "eid=" + form0.eid.value;
   query += "&kind=" + form0.kind.value;
   query += "&relay=" + form0.relayliststr.value.replace(/\n/g,';');
   var url = location.origin+location.pathname+"?"+query;
@@ -81,22 +92,21 @@ var makequery=function(){
     history.pushState(null,null,url);
   }
   prevurl=url;
-  document.title = form0.noteid.value.substr(0,12) + " searched by nostr-post-checker";
+  document.title = form0.eid.value.substr(0,12) + " searched by nostr-post-checker";
 }
 var startcheckrelays=function(){
-  makequery();
   iserror = false;
 
   /* check id */
   let n;
-  if(form0.noteid.value.substr(0, 6) == "nostr:"){
+  if(form0.eid.value.substr(0, 6) == "nostr:"){
     n = 6;
   }else{
     n = 0;
   }
-  if(form0.noteid.value.substr(n, 4) == "note" || form0.noteid.value.substr(n, 6) == "nevent"){
+  if(form0.eid.value.substr(n, 4) == "note" || form0.eid.value.substr(n, 6) == "nevent"){
     filter=["ids","id"];
-  }else if(form0.noteid.value.substr(n, 4) == "npub" || form0.noteid.value.substr(n, 8) == "nprofile"){
+  }else if(form0.eid.value.substr(n, 4) == "npub" || form0.eid.value.substr(n, 8) == "nprofile"){
     filter=["authors","pubkey"]
   }else{
     /* invalid id */
@@ -146,8 +156,8 @@ var startcheckrelays=function(){
       var r = this.r;
       print("ws["+relaylist[r]+"] was opened.\n");
 
-      if(form0.noteid.value.substr(0, 6) == "nostr:"){
-        noteObj = window.NostrTools.nip21.parse(form0.noteid.value);
+      if(form0.eid.value.substr(0, 6) == "nostr:"){
+        noteObj = window.NostrTools.nip21.parse(form0.eid.value);
         switch(noteObj.decoded.type){
           case "note":
           case "npub":
@@ -161,7 +171,7 @@ var startcheckrelays=function(){
             break;
         }
       }else{
-        noteObj = window.NostrTools.nip19.decode(form0.noteid.value);
+        noteObj = window.NostrTools.nip19.decode(form0.eid.value);
         switch(noteObj.type){
           case "note":
           case "npub":
