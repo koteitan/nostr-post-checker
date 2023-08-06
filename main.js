@@ -55,8 +55,36 @@ window.onload=function(){
     form0.relayliststr.value += defaultset.relaylist[r] + "\n";
   }
   form0.noteid.value = defaultset.noteid;
+  form0.kind.value = 1;
+  parsequery();
+}
+var parsequery=function(){
+  const sp = new URLSearchParams(window.location.search);
+  if(sp.has('noteid')){
+    form0.noteid.value = sp.get('noteid');
+  }
+  if(sp.has('kind')){
+    form0.kind.value = sp.get('kind');
+  }
+  if(sp.has('relay')){
+    form0.relayliststr.value = sp.get('relay').replace(/;/g,"\n");
+  }
+}
+var prevurl = "";
+var makequery=function(){
+  var query="";
+  query += "noteid=" + form0.noteid.value;
+  query += "&kind=" + form0.kind.value;
+  query += "&relay=" + form0.relayliststr.value.replace(/\n/g,';');
+  var url = location.origin+location.pathname+"?"+query;
+  if(prevurl!=url){
+    history.pushState(null,null,url);
+  }
+  prevurl=url;
+  document.title = form0.noteid.value.substr(0,12) + " searched by nostr-post-checker";
 }
 var startcheckrelays=function(){
+  makequery();
   iserror = false;
 
   /* check id */
