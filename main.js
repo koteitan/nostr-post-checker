@@ -1,35 +1,19 @@
 var defaultset=function(){};
 defaultset.mypubkey="4c5d5379a066339c88f6e101e3edb1fbaee4ede3eea35ffc6f1c664b3a4383ee";
 defaultset.eid="note15zl6ruufd5hcj0xmhq9r8yczjy2xt278qzn97e9zuc3dg36lkufq4326xp";
-defaultset.relaylist=[
+defaultset.relaylist=[// cf. https://docs.google.com/spreadsheets/d/16PPbdUiGhcgsSmZueio3CbjF95_11sKDgOGN0r9LBJ0/edit#gid=0
  // "ws://localhost:6969",
-  "wss://relay.snort.social",
+ // global relays (that are supported by more than 2 clients on 2023/8/6)
+  "wss://nos.lol",
   "wss://relay.damus.io",
-  "wss://offchain.pub",
+  "wss://eden.nostr.land",
+  "wss://relay.snort.social",
   "wss://nostr-pub.wellorder.net",
-  "wss://nostr-pub.semisol.dev",
-  "wss://relay.current.fyi",
+ // japanese relay (that are supported by more than 2 clients on 2023/8/6)
   "wss://relay-jp.nostr.wirednet.jp",
-  "wss://nostr.h3z.jp",
   "wss://nostr-relay.nokotaro.com",
   "wss://nostr.holybea.com",
-  "wss://test.relay.nostrich.day",
-  "wss://relay.nostr.or.jp",
-  "wss://nostr.fediverse.jp",
-  "wss://nostream.ocha.one",
-  "wss://relayer.ocha.one",
-  "wss://nos.lol",
-  "wss://nostr.relayer.se",
-  "wss://nostr.shawnyeager.net/",
-  "wss://global.relay.red/",
-  "wss://relay.nostr.vision/",
-  "wss://nostr.zkid.social/",
-  "wss://relay.nostr.info",
-  "wss://nostr.bingtech.tk/",
-  "wss://nostr.fmt.wiz.biz",
-  "wss://brb.io",
-  "wss://nostr.rewardsbunny.com/",
-  "wss://nostr.lnprivate.network/",
+  "wss://yabu.me",
 ];
 if(false){
   defaultset.relaylist=[
@@ -104,10 +88,14 @@ var startcheckrelays=function(){
   }else{
     n = 0;
   }
+  var ishex=false;
   if(form0.eid.value.substr(n, 4) == "note" || form0.eid.value.substr(n, 6) == "nevent"){
     filter=["ids","id"];
   }else if(form0.eid.value.substr(n, 4) == "npub" || form0.eid.value.substr(n, 8) == "nprofile"){
     filter=["authors","pubkey"]
+  }else if(form0.eid.value.replace(/[a-fA-F0-9]+/g,'').length==0){
+    ishex=true;
+    filter=["ids","id"];
   }else{
     /* invalid id */
     iserror = true;
@@ -156,6 +144,7 @@ var startcheckrelays=function(){
       var r = this.r;
       print("ws["+relaylist[r]+"] was opened.\n");
 
+      //making notehex
       if(form0.eid.value.substr(0, 6) == "nostr:"){
         noteObj = window.NostrTools.nip21.parse(form0.eid.value);
         switch(noteObj.decoded.type){
@@ -170,6 +159,8 @@ var startcheckrelays=function(){
             notehex = noteObj.decoded.data.pubkey;
             break;
         }
+      }else if(ishex){
+          notehex = form0.eid.value;
       }else{
         noteObj = window.NostrTools.nip19.decode(form0.eid.value);
         switch(noteObj.type){
