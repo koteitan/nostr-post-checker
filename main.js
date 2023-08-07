@@ -6,14 +6,15 @@ defaultset.relaylist=[// cf. https://docs.google.com/spreadsheets/d/16PPbdUiGhcg
  // global relays (that are supported by more than 2 clients on 2023/8/6)
   "wss://nos.lol",
   "wss://relay.damus.io",
-  "wss://eden.nostr.land",
+//  "wss://eden.nostr.land",
   "wss://relay.snort.social",
   "wss://nostr-pub.wellorder.net",
+  "wss://relay.nostr.band",
  // japanese relay (that are supported by more than 2 clients on 2023/8/6)
+  "wss://yabu.me",
   "wss://relay-jp.nostr.wirednet.jp",
   "wss://nostr-relay.nokotaro.com",
   "wss://nostr.holybea.com",
-  "wss://yabu.me",
 ];
 if(false){
   defaultset.relaylist=[
