@@ -302,3 +302,17 @@ var genuuid = function(){
   }
   return chars.join("");
 }
+async function get_my_relays(){
+  relay=window.NostrTools.relayInit("wss://yabu.me");
+  relay.on("error",()=>{});
+  await relay.connect();
+  sub=relay.sub([{"kinds":[3],"authors":[await window.nostr.getPublicKey()]}]);
+  var str=await new Promise((resolve, reject)=>{
+    sub.on("event",(ev)=>{resolve(ev);});
+  });
+  var relaylist = Object.keys(JSON.parse(str.content));
+  form0.relayliststr.value = "";
+  for(var r=0;r<relaylist.length;r++){
+    form0.relayliststr.value += relaylist[r] + "\n";
+  }
+}
