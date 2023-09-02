@@ -302,17 +302,46 @@ var genuuid = function(){
   }
   return chars.join("");
 }
-async function get_my_relays(){
-  relay=window.NostrTools.relayInit("wss://yabu.me");
-  relay.on("error",()=>{});
-  await relay.connect();
-  sub=relay.sub([{"kinds":[3],"authors":[await window.nostr.getPublicKey()]}]);
-  var str=await new Promise((resolve, reject)=>{
-    sub.on("event",(ev)=>{resolve(ev);});
-  });
-  var relaylist = Object.keys(JSON.parse(str.content));
+put_my_relays = async function(){
+  var list = await get_my_relays();
   form0.relayliststr.value = "";
-  for(var r=0;r<relaylist.length;r++){
-    form0.relayliststr.value += relaylist[r] + "\n";
+  for(relay of list){
+    form0.relayliststr.value += relay + "\n";
   }
 }
+async function get_my_relays(){
+  var relaylist = Object.keys(await window.nostr.getRelays());
+  var filter = [{"kinds":[3],"authors":[await window.nostr.getPublicKey()]}];
+  var plist = [];
+  var resultlist = await Promise.all(relaylist.map(async (url)=>{
+    var relay = window.NostrTools.relayInit(url);
+    relay.on("error",()=>{console.log("error:relay.on for the relay "+url)});
+    await relay.connect();
+    sub = relay.sub(filter);
+    var result = [];
+    return new Promise((resolve)=>{
+      setTimeout(()=>resolve(result), 5000);
+      sub.on("event",(ev)=>{
+        console.log("event:"+ev);
+        result.push({
+          time     :ev.created_at,
+          relaylist:Object.keys(JSON.parse(ev.content)),
+          origin   :url,
+        });
+      });
+      sub.on("eose",()=>{
+        resolve(result);
+      });
+    });
+  }));
+  latest = {time:0, relaylist:defaultset.relaylist};
+  for(r1 of resultlist){
+    for(r2 of r1){
+      if(r2.time > latest.time){
+        latest = r2;
+      }
+    }
+  }
+  return latest.relaylist;
+}
+
