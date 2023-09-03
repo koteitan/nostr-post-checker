@@ -285,7 +285,7 @@ var drawresult = function(r){
 }
 
 var print = function(m){
-  form0.debugout.value += m;
+  form1.debugout.value += m;
 }
 
 var genuuid = function(){
@@ -302,16 +302,16 @@ var genuuid = function(){
   }
   return chars.join("");
 }
-put_my_relays = async function(){
-  var list = await get_my_relays();
+put_my_relays = async function(kind){
+  var list = await get_my_relays(kind);
   form0.relayliststr.value = "";
   for(relay of list){
     form0.relayliststr.value += relay + "\n";
   }
 }
-async function get_my_relays(){
+async function get_my_relays(kind){
   var relaylist = Object.keys(await window.nostr.getRelays());
-  var filter = [{"kinds":[3],"authors":[await window.nostr.getPublicKey()]}];
+  var filter = [{"kinds":[kind],"authors":[await window.nostr.getPublicKey()]}];
   var plist = [];
   var resultlist = await Promise.all(relaylist.map(async (url)=>{
     var relay = window.NostrTools.relayInit(url);
@@ -322,12 +322,23 @@ async function get_my_relays(){
     return new Promise((resolve)=>{
       setTimeout(()=>resolve(result), 5000);
       sub.on("event",(ev)=>{
-        console.log("event:"+ev);
-        result.push({
-          time     :ev.created_at,
-          relaylist:Object.keys(JSON.parse(ev.content)),
-          origin   :url,
-        });
+        if(kind==3){
+          result.push({
+            time     :ev.created_at,
+            relaylist:Object.keys(JSON.parse(ev.content)),
+            origin   :url,
+          });
+        }else if(kind==10002){
+          var rl=[];
+          for(t of ev.tags){
+            rl.push(t[1]);
+          }
+          result.push({
+            time     :ev.created_at,
+            relaylist:rl,
+            origin   :url,
+          });
+        }
       });
       sub.on("eose",()=>{
         resolve(result);
