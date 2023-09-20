@@ -35,6 +35,7 @@ var filter;
 var iserror;
 var uuid;
 window.onload=function(){
+  initHtml(navigator.language);
   uuid = genuuid();
   for(var r=0;r<defaultset.relaylist.length;r++){
     form0.relayliststr.value += defaultset.relaylist[r] + "\n";
@@ -78,6 +79,17 @@ var makequery=function(){
   }
   prevurl=url;
   document.title = form0.eid.value.substr(0,12) + " searched by nostr-post-checker";
+}
+var initHtml=(lang)=>{
+  var ja = Array.from(document.getElementsByClassName('langja'));
+  var en = Array.from(document.getElementsByClassName('langen'));
+  if(lang=='ja'){
+    ja.map((x)=>x.style.display='inline');
+    en.map((x)=>x.style.display='none'  );
+  }else{
+    en.map((x)=>x.style.display='inline');
+    ja.map((x)=>x.style.display='none'  );
+  }
 }
 var startcheckrelays=function(){
   iserror = false;
