@@ -141,13 +141,7 @@ button{
     font-size: 1rem;
 }
 
-.eid,
-.kind,
-.relayliststr {
-  width: 95%;
-}
 .debugout {
-  width: 95%;
   display:none
 }
 .langja{

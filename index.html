@@ -1,71 +1,73 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>nostr-post-checker</title>
-        <meta http-equiv="Content-type" content="text/html; charset=utf8">
-        <meta http-equiv="Content-Style-Type" content="text/css">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" type="text/css" href="style.css">
-    </head>
-    <body>
-        <h1>nostr-post-checker</h1>
-        <p>
-        <span class="langja">イベントがどのリレーに存在し、どのリレーに存在していないかを確認するサイトです。</span>
-        <span class="langen">You can check which relay servers the event exists on and which do not.</span>
-        </p>
-        <form name=form0>
-            <div>
-                <label for="eid">event id:</label>
-                <input id="eid" name="eid" type="text" class="eid" value="note15zl6ruufd5hcj0xmhq9r8yczjy2xt278qzn97e9zuc3dg36lkufq4326xp"/>
-            </div>
-            <div>
-                <label for="kind">kind:</label>
-                <input id="kind" name="kind" type="text" class="kind" value="1"/>
-            </div>
-            <div>
-              <label for="relayliststr">relays:</label><br>
-              <span class="langen"><input type="button" value="Get your relay list" onclick="javascript:put_my_relays(3);"> by NIP-07 and kind:3 content</span>
-              <span class="langja"><input type="button" value="リレーリストを取得" onclick="javascript:put_my_relays(3);"> (NIP-07, kind:3 content)</span>
-              <br>
-              <span class="langen"><input type="button" value="Get your relay list" onclick="javascript:put_my_relays(10002);"> by NIP-07 and kind:10002 r tags</span>
-              <span class="langja"><input type="button" value="リレーリストを取得" onclick="javascript:put_my_relays(10002);"> (NIP-07, kind:10002 r tag)</span>
-                <textarea id="relayliststr" name="relayliststr" class="relayliststr" rows="10"></textarea>
-            </div>
-            <button name="req" type="button" onclick="javascript:makequery();startcheckrelays();">search</button>
-        </form>
-        <p>result:<span id="time"></span></p>
-        <div id="result"></div>
-        <form name=form1>
-          <div>debug:<input type="checkbox" name="debugcheck" onclick="showdebug();">show debug<br>
-          <textarea name="debugout" class="debugout" rows="30"></textarea>
-          </div>
-        </form>
-        <hr>
-        <p>
-        <span class="langja">使い方:</span>
-        <span class="langen">usage:</span>
-        </p>
-        <ul>
-          <li>
-            <span class="langja">event id ボックスに調べたい"note1～", "nevent1～", "npub1～", "nprofile1～" を入力します。</span>
-            <span class="langen">Put "note1...", "nevent1...", "npub1..." or "nprofile1..." you want to check into the "event id" box.</span>
-          </li>
-          <li>
-            <span class="langja">kind ボックスに調べたいkindの数字を入力します。</span>
-            <span class="langen">Put the kind number you want to check in the "kind" box.</span>
-          </li>
-          <li>
-            <span class="langja">relays ボックスに調べたいリレーの URL を入力します。複数リレーを調べたいときは改行で追加してください。</span>
-            <span class="langen">Put the relay addresses you want to check in the "relays" box.</span>
-          </li>
-        </ul>
-        <address>
-          <a href="./">nostr-post-checker</a> version 1.17<br>
-            Programmed by <a href="https://iris.to/koteitan">koteitan</a> and 2 contributors<br>
-            Source code is on <a href="https://github.com/koteitan/nostr-post-checker">github</a><br>
-            The program and the site is licensed by <a href="https://github.com/koteitan/nostr-post-checker/blob/master/LICENSE.md">MIT License</a>.
-        </address>
-        <script type="text/javascript" src="./main.js"></script>
-        <script src="https://unpkg.com/nostr-tools/lib/nostr.bundle.js"></script>
-    </body>
+  <head>
+    <title>nostr-post-checker</title>
+    <meta http-equiv="Content-type" content="text/html; charset=utf8">
+    <meta http-equiv="Content-Style-Type" content="text/css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="style.css">
+  </head>
+  <body>
+    <h1>nostr-post-checker</h1>
+    <p>
+    <span class="langja">イベントがどのリレーに存在し、どのリレーに存在していないかを確認するサイトです。</span>
+    <span class="langen">You can check which relay servers the event exists on and which do not.</span>
+    </p>
+    <form name=form0>
+      <table style="width:95%">
+        <tr>
+          <td style="width:5em"><label for="eid">event id:</label></td>
+          <td><input id="eid" name="eid" type="text" style="width:100%" value="note15zl6ruufd5hcj0xmhq9r8yczjy2xt278qzn97e9zuc3dg36lkufq4326xp"/></td>
+        </tr>
+        <tr>
+          <td><label for="kind">kind:</label></td>
+          <td><input id="kind" name="kind" type="text" style="width:100%" value="1"/></td>
+        </tr>
+      </table>
+      <div>
+        <label for="relayliststr">relays:</label><br>
+        <span class="langen"><input type="button" value="Get your relay list" onclick="javascript:put_my_relays(3);"> by NIP-07 and kind:3 content</span>
+        <span class="langja"><input type="button" value="リレーリストを取得" onclick="javascript:put_my_relays(3);"> (NIP-07, kind:3 content)</span>
+        <br>
+        <span class="langen"><input type="button" value="Get your relay list" onclick="javascript:put_my_relays(10002);"> by NIP-07 and kind:10002 r tags</span>
+        <span class="langja"><input type="button" value="リレーリストを取得" onclick="javascript:put_my_relays(10002);"> (NIP-07, kind:10002 r tag)</span><br>
+        <textarea style="width:95%" id="relayliststr" name="relayliststr" class="relayliststr" rows="10"></textarea><br>
+        <button name="req" type="button" onclick="javascript:makequery();startcheckrelays();">search</button>
+      </div>
+    </form>
+    <p>result:<span id="time"></span></p>
+    <table style="width:95%" id="result"></table>
+    <form name=form1>
+      <div>debug:<input type="checkbox" name="debugcheck" onclick="showdebug();">show debug<br>
+      <textarea name="debugout" class="debugout" rows="30"></textarea>
+      </div>
+    </form>
+    <hr>
+    <p>
+    <span class="langja">使い方:</span>
+    <span class="langen">usage:</span>
+    </p>
+    <ul>
+      <li>
+        <span class="langja">event id ボックスに調べたい"note1～", "nevent1～", "npub1～", "nprofile1～" を入力します。</span>
+        <span class="langen">Put "note1...", "nevent1...", "npub1..." or "nprofile1..." you want to check into the "event id" box.</span>
+      </li>
+      <li>
+        <span class="langja">kind ボックスに調べたいkindの数字を入力します。</span>
+        <span class="langen">Put the kind number you want to check in the "kind" box.</span>
+      </li>
+      <li>
+        <span class="langja">relays ボックスに調べたいリレーの URL を入力します。複数リレーを調べたいときは改行で追加してください。</span>
+        <span class="langen">Put the relay addresses you want to check in the "relays" box.</span>
+      </li>
+    </ul>
+    <address>
+      <a href="./">nostr-post-checker</a> version 1.18<br>
+        Programmed by <a href="https://iris.to/koteitan">koteitan</a> and 2 contributors<br>
+        Source code is on <a href="https://github.com/koteitan/nostr-post-checker">github</a><br>
+        The program and the site is licensed by <a href="https://github.com/koteitan/nostr-post-checker/blob/master/LICENSE.md">MIT License</a>.
+    </address>
+    <script type="text/javascript" src="./main.js"></script>
+    <script src="https://unpkg.com/nostr-tools/lib/nostr.bundle.js"></script>
+  </body>
 </html>
