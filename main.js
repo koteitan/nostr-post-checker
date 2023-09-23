@@ -143,19 +143,23 @@ var startcheckrelays=function(){
     ws[r].status = "idle";
     ws[r].recv = [];
     ws[r].onerror = function(e){
-      ws[this.r].status = "error";
+      print("error: "+relaylist[this.r]+" :ws[r].onerror\n");
+      if(ws[this.r].status != "received"){
+        ws[this.r].status = "error";
+      }
     }
     ws[r].onmessage = function(m){
       var r=this.r;
+      print("recv : "+relaylist[this.r]+"\n");
       ws[r].recv.push(JSON.parse(m.data));
-      print("received message from ws["+relaylist[r]+"]='"+m.data+"'\n");
+      //print("received message from ws["+relaylist[r]+"]='"+m.data+"'\n");
       ws[r].close();
       ws[r].status = "received";
       drawresult(r);
     };
     ws[r].onopen = function(e){
       var r = this.r;
-      print("ws["+relaylist[r]+"] was opened.\n");
+      //print("ws["+relaylist[r]+"] was opened.\n");
 
       //making notehex
       if(form0.eid.value.substr(0, 6) == "nostr:"){
@@ -199,7 +203,7 @@ var startcheckrelays=function(){
       ];
       sendstr = JSON.stringify(sendobj);
       ws[r].send(sendstr);
-      print("sent '"+sendstr+"'\n");
+      //print("sent '"+sendstr+"'\n");
       ws[r].status = "sent";
     };
   }
@@ -227,7 +231,7 @@ var checkmsg = function(){
   }
   if(yet){
     curms += nextms;
-    print("curms="+curms+"\n");
+    //print("curms="+curms+"\n");
     if(curms+nextms<timeout){
       setTimeout(checkmsg, nextms);
       return;
@@ -322,9 +326,14 @@ put_my_relays = async function(kind){
   }
 }
 async function get_my_relays(kind){
-  var relaylist = Object.keys(await window.nostr.getRelays());
+  var bsrelay;
+  if(window.nostr !== undefined){
+    bsrelay = await window.nostr.getRelays();
+  }else{
+    bsrelay = defaultset.relaylist;
+  }
+  var relaylist = Object.keys(bsrelay);
   var filter = [{"kinds":[kind],"authors":[await window.nostr.getPublicKey()]}];
-  var plist = [];
   var resultlist = await Promise.all(relaylist.map(async (url)=>{
     var relay = window.NostrTools.relayInit(url);
     relay.on("error",()=>{console.log("error:relay.on for the relay "+url)});
