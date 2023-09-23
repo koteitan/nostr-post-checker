@@ -91,6 +91,13 @@ var initHtml=(lang)=>{
     ja.map((x)=>x.style.display='none'  );
   }
 }
+var showdebug = function(){
+  if(form1.debugcheck.checked){
+    document.getElementsByClassName('debugout')[0].style.display='block';
+  }else{
+    document.getElementsByClassName('debugout')[0].style.display='none';
+  }
+}
 var startcheckrelays=function(){
   iserror = false;
 

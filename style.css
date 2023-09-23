@@ -143,11 +143,11 @@ button{
 
 .eid,
 .kind,
-.relayliststr,
-.debugout {
-    width: 98%;
+.relayliststr {
+  width: 95%;
 }
-.debug{
+.debugout {
+  width: 95%;
   display:none
 }
 .langja{

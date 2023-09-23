@@ -25,16 +25,21 @@
             <div>
               <label for="relayliststr">relays:</label><br>
               <span class="langen"><input type="button" value="Get your relay list" onclick="javascript:put_my_relays(3);"> by NIP-07 and kind:3 content</span>
-              <span class="langja"><input type="button" value="リレーリストを取得" onclick="javascript:put_my_relays(3);"> (NIP-07 と kind:3 content から)</span>
+              <span class="langja"><input type="button" value="リレーリストを取得" onclick="javascript:put_my_relays(3);"> (NIP-07, kind:3 content)</span>
               <br>
               <span class="langen"><input type="button" value="Get your relay list" onclick="javascript:put_my_relays(10002);"> by NIP-07 and kind:10002 r tags</span>
-              <span class="langja"><input type="button" value="リレーリストを取得" onclick="javascript:put_my_relays(10002);"> (NIP-07 と kind:10002 r tag から)</span>
+              <span class="langja"><input type="button" value="リレーリストを取得" onclick="javascript:put_my_relays(10002);"> (NIP-07, kind:10002 r tag)</span>
                 <textarea id="relayliststr" name="relayliststr" class="relayliststr" rows="10"></textarea>
             </div>
             <button name="req" type="button" onclick="javascript:makequery();startcheckrelays();">search</button>
         </form>
         <p>result:<span id="time"></span></p>
         <div id="result"></div>
+        <form name=form1>
+          <div>debug:<input type="checkbox" name="debugcheck" onclick="showdebug();">show debug<br>
+          <textarea name="debugout" class="debugout" rows="30"></textarea>
+          </div>
+        </form>
         <hr>
         <p>
         <span class="langja">使い方:</span>
@@ -55,16 +60,11 @@
           </li>
         </ul>
         <address>
-          <a href="./">nostr-post-checker</a> version 1.16<br>
+          <a href="./">nostr-post-checker</a> version 1.17<br>
             Programmed by <a href="https://iris.to/koteitan">koteitan</a> and 2 contributors<br>
             Source code is on <a href="https://github.com/koteitan/nostr-post-checker">github</a><br>
             The program and the site is licensed by <a href="https://github.com/koteitan/nostr-post-checker/blob/master/LICENSE.md">MIT License</a>.
         </address>
-        <form name=form1>
-          <div class="debug">debug:<br>
-          <textarea name="debugout" class="debugout" rows="30"></textarea>
-          </div>
-        </form>
         <script type="text/javascript" src="./main.js"></script>
         <script src="https://unpkg.com/nostr-tools/lib/nostr.bundle.js"></script>
     </body>
