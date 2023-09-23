@@ -143,11 +143,12 @@ var startcheckrelays=function(){
     ws[r].status = "idle";
     ws[r].recv = [];
     ws[r].onerror = function(e){
-      print("error:ws[r].onerror: relay = "+relaylist[this.r]+"\n");
+      print("error: "+relaylist[this.r]+" :ws[r].onerror\n");
       ws[this.r].status = "error";
     }
     ws[r].onmessage = function(m){
       var r=this.r;
+      print("recv : "+relaylist[this.r]+"\n");
       ws[r].recv.push(JSON.parse(m.data));
       //print("received message from ws["+relaylist[r]+"]='"+m.data+"'\n");
       ws[r].close();
