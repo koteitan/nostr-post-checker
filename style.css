@@ -54,11 +54,17 @@ address {
     border-width: 0.01rem;
     border-style: solid;
     height: 1.8rem;
-    width: 98%; /* changed to percentage */
     padding: 0 0.3rem;
     vertical-align: middle;
 }
 
+.tdcon,
+.tderror,
+.tdexist,
+.tdnotexist {
+    text-align: right;
+    width: 7rem;
+}
 .tdcon {
     background-color: #ffffff;
 }

@@ -257,15 +257,18 @@ var preparetable = function(){
   for(var r=0;r<relays;r++){
     var tr = document.createElement("tr");
     table.appendChild(tr);
+
     var td0 = document.createElement("td");
-    td0.innerHTML = relaylist[r];
-    td0.setAttribute("class","tdrelay");
+    td0.innerHTML = "connecting...";
+    td0.setAttribute("class","tdcon");
     tr.appendChild(td0);
+
     var td1 = document.createElement("td");
-    td1.innerHTML = "connecting...";
-    td1.setAttribute("class","tdcon");
+    td1.innerHTML = relaylist[r];
+    td1.setAttribute("class","tdrelay");
     tr.appendChild(td1);
-    ws[r].td = td1;
+
+    ws[r].td = td0;
   }
 }
 var drawresult = function(r){
