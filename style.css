@@ -138,6 +138,9 @@ dd {
     width: 100%; /* changed to percentage */
 }
 
+.fullwidth {
+    width: 95%;
+}
 textarea, 
 input {
     font-size: 1rem;
