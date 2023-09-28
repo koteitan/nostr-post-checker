@@ -36,49 +36,91 @@ var iserror;
 var uuid;
 window.onload=function(){
   initHtml(navigator.language);
-  uuid = genuuid();
+  
+  var isfromquery = false;
+  var isfromls    = false;
+
+  //try to get settings from HTTP query
+  var urlsp = getaddr();
+  var isfromquery = url2form(urlsp);
+  if(isfromquery){
+    //auto start check
+    startcheckrelays();
+    return;
+  }
+
+  //try to get settings from localStorage
+  var r = localStorage.getItem("settings");
+  if(r!==null){
+    var urlsp = new URLSearchParams(r);
+    isfromls = url2form(urlsp);
+    if(isfromls){
+      return;
+    }
+  }
+
+  //default settings 
   for(var r=0;r<defaultset.relaylist.length;r++){
     form0.relayliststr.value += defaultset.relaylist[r] + "\n";
   }
   form0.eid.value = defaultset.eid;
   form0.kind.value = 1;
-  var autostart = parsequery();
-  if(autostart)startcheckrelays();
+
 }
-var parsequery=function(){
-  const sp = new URLSearchParams(window.location.search);
+var handle_copy_button=function(){
+  const url = form2url();
+  navigator.clipboard.writeText(url);
+}
+var handle_search_button=function(){
+  var str=form2url();
+  str="?"+str.split("?")[1];
+  localStorage.setItem("settings", str);
+  startcheckrelays();
+}
+/* return browser address */
+var getaddr=function(){
+  return new URLSearchParams(window.location.search);
+}
+/* set url into browser address, and jump. (no url, no query) */
+var setaddr=function(url){
+  if(url === undefined){
+    url = location.origin+location.pathname;
+  }
+  document.title = form0.eid.value.substr(0,12) + " searched by nostr-post-checker";
+  if(prevurl!=url){
+    history.pushState(null,null,url);
+  }
+  prevurl=url;
+}
+var prevurl = "";
+var url2form=function(urlsp){
   var ready = true;
-  if(sp.has('eid')){
-    form0.eid.value = sp.get('eid');
-  }else if(sp.has('noteid')){ // support old version
-    form0.eid.value = sp.get('noteid');
+  if(urlsp.has('eid')){
+    form0.eid.value = urlsp.get('eid');
+  }else if(urlsp.has('noteid')){ // support old version
+    form0.eid.value = urlsp.get('noteid');
   }else{
     ready=false;
   }
-  if(sp.has('kind')){
-    form0.kind.value = sp.get('kind');
+  if(urlsp.has('kind')){
+    form0.kind.value = urlsp.get('kind');
   }else{
     ready=false;
   }
-  if(sp.has('relay')){
-    form0.relayliststr.value = sp.get('relay').replace(/;/g,"\n");
+  if(urlsp.has('relay')){
+    form0.relayliststr.value = urlsp.get('relay').replace(/;/g,"\n");
   }else{
     ready=false;
   }
   return ready;
 }
-var prevurl = "";
-var makequery=function(){
+var form2url=function(){
   var query="";
   query += "eid=" + form0.eid.value;
   query += "&kind=" + form0.kind.value;
   query += "&relay=" + form0.relayliststr.value.replace(/\n/g,';');
   var url = location.origin+location.pathname+"?"+query;
-  if(prevurl!=url){
-    history.pushState(null,null,url);
-  }
-  prevurl=url;
-  document.title = form0.eid.value.substr(0,12) + " searched by nostr-post-checker";
+  return url;
 }
 var initHtml=(lang)=>{
   var ja = Array.from(document.getElementsByClassName('langja'));
@@ -144,6 +186,7 @@ var startcheckrelays=function(){
   }
   ws = new Array(relays); // ws[r]
   for(var r=0;r<relays;r++){
+    uuid = genuuid();
     ws[r] = new WebSocket(relaylist[r]);
     ws[r].uuid = uuid;
     ws[r].r = r;
@@ -340,7 +383,7 @@ async function get_my_relays(kind){
   if(window.nostr !== undefined){
     bsrelay = await window.nostr.getRelays();
   }else{
-    bsrelay = defaultset.relaylist;
+    return defaultset.relaylist;
   }
   var relaylist = Object.keys(bsrelay);
   var filter = [{"kinds":[kind],"authors":[await window.nostr.getPublicKey()]}];

@@ -32,7 +32,8 @@
         <span class="langen"><input type="button" value="Get your relay list" onclick="javascript:put_my_relays(10002);"> by NIP-07 and kind:10002 r tags</span>
         <span class="langja"><input type="button" value="リレーリストを取得" onclick="javascript:put_my_relays(10002);"> (NIP-07, kind:10002 r tag)</span><br>
         <textarea style="width:100%" id="relayliststr" name="relayliststr" rows="10"></textarea><br>
-        <button name="req" type="button" onclick="javascript:makequery();startcheckrelays();">search</button>
+        <button name="req"  type="button" onclick="javascript:handle_search_button();">search</button>
+        <button name="copy" type="button" onclick="javascript:handle_copy_button()  ;">copy URL</button>
       </div>
     </form>
     <p>result:<span id="time"></span></p>
@@ -62,7 +63,7 @@
       </li>
     </ul>
     <address>
-      <a href="./">nostr-post-checker</a> version 1.20<br>
+      <a href="./">nostr-post-checker</a> version 1.21<br>
         Programmed by <a href="https://iris.to/koteitan">koteitan</a> and 2 contributors<br>
         Source code is on <a href="https://github.com/koteitan/nostr-post-checker">github</a><br>
         The program and the site is licensed by <a href="https://github.com/koteitan/nostr-post-checker/blob/master/LICENSE.md">MIT License</a>.
