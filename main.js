@@ -388,7 +388,7 @@ async function get_my_relays(kind){
   var relaylist = Object.keys(bsrelay);
   var filter = [{"kinds":[kind],"authors":[await window.nostr.getPublicKey()]}];
   var resultlist = await Promise.all(relaylist.map(async (url)=>{
-    var relay = await window.NostrTools.Relay.connect(url);
+    var relay = window.NostrTools.relayInit(url);
     relay.on("error",()=>{console.log("error:relay.on for the relay "+url)});
     await relay.connect();
     sub = relay.sub(filter);
