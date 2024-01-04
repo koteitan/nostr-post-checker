@@ -1,3 +1,4 @@
+var version = "1.26";
 var debug_extension_emulated=false;
 if(debug_extension_emulated){
   window.nostr = function(){};
@@ -53,6 +54,9 @@ var filter;
 var iserror;
 var uuid;
 window.onload=function(){
+  //show version
+  document.getElementById('version').innerHTML=version;
+
   initHtml(navigator.language);
   
   var isfromquery = false;
