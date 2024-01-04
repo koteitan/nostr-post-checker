@@ -1,3 +1,10 @@
+var debug_extension_emulated=false;
+if(debug_extension_emulated){
+  window.nostr = function(){};
+  window.nostr.getRelays    = function(){return debug_relaylist;};
+  window.nostr.getPublicKey = function(){return defaultset.mypubkey;};
+  window.NostrTools = function(){};
+}
 var defaultset=function(){};
 defaultset.mypubkey="4c5d5379a066339c88f6e101e3edb1fbaee4ede3eea35ffc6f1c664b3a4383ee";
 defaultset.eid="note15zl6ruufd5hcj0xmhq9r8yczjy2xt278qzn97e9zuc3dg36lkufq4326xp";
@@ -16,6 +23,17 @@ defaultset.relaylist=[// cf. https://docs.google.com/spreadsheets/d/16PPbdUiGhcg
   "wss://nostr-relay.nokotaro.com",
   "wss://nostr.holybea.com",
 ];
+var debug_relaylist={
+  "wss://yabu.me"                :{read:true, write:true},
+  "wss://nostr1.tunnelsats.com"  :{read:true, write:true},
+  "wss://nostr-01.bolt.observer" :{read:true, write:true},
+  "wss://nostr-pub.wellorder.net":{read:true, write:true},
+  "wss://nostr-relay.wlvs.space" :{read:true, write:true},
+  "wss://nostr.bitcoiner.social" :{read:true, write:true},
+  "wss://relay.damus.io"         :{read:true, write:true},
+//  "wss://relay.nostr.info"       :{read:true, write:true},
+  "wss://relayer.fiatjaf.com"    :{read:true, write:true},
+};//alby
 if(false){
   defaultset.relaylist=[
     "ws://localhost:6969",
@@ -372,29 +390,47 @@ var genuuid = function(){
   return chars.join("");
 }
 put_my_relays = async function(kind){
-  var list = await get_my_relays(kind);
-  form0.relayliststr.value = "";
-  for(relay of list){
-    form0.relayliststr.value += relay + "\n";
-  }
+    form0.relayliststr.value = "wait for your relays...";
+    try{
+      var list = await get_my_relays(kind);
+      form0.relayliststr.value = "";
+      for(relay of list){
+        form0.relayliststr.value += relay + "\n";
+      }
+    }catch(e){
+      form0.relayliststr.value = e;
+    }
 }
 async function get_my_relays(kind){
   var bsrelay;
   if(window.nostr !== undefined){
     bsrelay = await window.nostr.getRelays();
   }else{
-    return defaultset.relaylist;
+    throw "Please set NIP-07 browser extension."
   }
   var relaylist = Object.keys(bsrelay);
   var filter = [{"kinds":[kind],"authors":[await window.nostr.getPublicKey()]}];
-  var resultlist = await Promise.all(relaylist.map(async (url)=>{
-    var relay = window.NostrTools.relayInit(url);
-    relay.on("error",()=>{console.log("error:relay.on for the relay "+url)});
-    await relay.connect();
-    sub = relay.sub(filter);
+  var resultlist = await Promise.allSettled(relaylist.map(async (url)=>{
     var result = [];
+
+    await Promise.race([new Promise(async (resolve, reject)=>{
+      var relay = window.NostrTools.relayInit(url);
+      relay.on("error",()=>{
+        reject();
+      });
+      try{
+        await relay.connect();
+        sub = relay.sub(filter);
+        resolve();
+      }catch{
+        return new Promise((resolve)=>{resolve([]);});
+      }
+    }),new Promise((resolve,reject)=>{
+      setTimeout(reject, 1000);
+    })]).catch(err=>{return new Promise((resolve)=>{resolve([]);});});
+
     return new Promise((resolve)=>{
-      setTimeout(()=>resolve(result), 5000);
+      setTimeout(()=>resolve(result), 3000);
       sub.on("event",(ev)=>{
         if(kind==3){
           result.push({
@@ -415,18 +451,23 @@ async function get_my_relays(kind){
         }
       });
       sub.on("eose",()=>{
+        console.log("found:"+url);
         resolve(result);
       });
     });
-  }));
-  latest = {time:0, relaylist:defaultset.relaylist};
-  for(r1 of resultlist){
-    for(r2 of r1){
-      if(r2.time > latest.time){
-        latest = r2;
+  })).then(results=>{
+    console.log("debug:-------");
+    latest = {time:0, relaylist:defaultset.relaylist};
+    for(r1 of results){
+      if(r1.status=='rejected')continue;
+      for(r2 of r1.value){
+        if(r2.time > latest.time){
+          latest = r2;
+        }
       }
     }
-  }
-  return latest.relaylist;
+    return latest.relaylist;
+  });
+  return resultlist;
 }
 
