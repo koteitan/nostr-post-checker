@@ -1,4 +1,4 @@
-var version = "1.28";
+var version = "1.29";
 var debug_extension_emulated=false;
 if(debug_extension_emulated){
   window.nostr = function(){};
@@ -131,10 +131,12 @@ var urlsp2form=function(urlsp){
 }
 var form2url=function(){
   var query="";
-  query += "eid=" + form0.eid.value;
-  query += "&kind=" + form0.kind.value;
-  query += "&relay=" + form0.relayliststr.value.replace(/\n/g,';');
-  var url = location.origin+location.pathname+"?"+query;
+  if(form0.eid .value!="") query += "&eid="  + form0.eid .value;
+  if(form0.kind.value!="") query += "&kind=" + form0.kind.value;
+  if(form0.relayliststr.value!=""){
+    query += "&relay=" + form0.relayliststr.value.replace(/\n/g,';');
+  }
+  var url = location.origin+location.pathname+"?"+query.slice(1);
   return url;
 }
 var initHtml=(lang)=>{
