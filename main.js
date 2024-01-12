@@ -62,6 +62,13 @@ window.onload=function(){
   var isfromquery = false;
   var isfromls    = false;
 
+  //default settings 
+  for(var r=0;r<defaultset.relaylist.length;r++){
+    form0.relayliststr.value += defaultset.relaylist[r] + "\n";
+  }
+  form0.eid.value = defaultset.eid;
+  form0.kind.value = 1;
+
   //try to get settings from HTTP query
   var urlsp = getaddr();
   var isfromquery = url2form(urlsp);
@@ -80,13 +87,6 @@ window.onload=function(){
       return;
     }
   }
-
-  //default settings 
-  for(var r=0;r<defaultset.relaylist.length;r++){
-    form0.relayliststr.value += defaultset.relaylist[r] + "\n";
-  }
-  form0.eid.value = defaultset.eid;
-  form0.kind.value = 1;
 
 }
 var handle_copy_button=function(){
