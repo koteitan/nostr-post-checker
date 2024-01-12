@@ -1,4 +1,4 @@
-var version = "1.26";
+var version = "1.27";
 var debug_extension_emulated=false;
 if(debug_extension_emulated){
   window.nostr = function(){};
