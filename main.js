@@ -1,4 +1,4 @@
-var version = "1.26";
+var version = "1.29";
 var debug_extension_emulated=false;
 if(debug_extension_emulated){
   window.nostr = function(){};
@@ -62,25 +62,6 @@ window.onload=function(){
   var isfromquery = false;
   var isfromls    = false;
 
-  //try to get settings from HTTP query
-  var urlsp = getaddr();
-  var isfromquery = url2form(urlsp);
-  if(isfromquery){
-    //auto start check
-    startcheckrelays();
-    return;
-  }
-
-  //try to get settings from localStorage
-  var r = localStorage.getItem("settings");
-  if(r!==null){
-    var urlsp = new URLSearchParams(r);
-    isfromls = url2form(urlsp);
-    if(isfromls){
-      return;
-    }
-  }
-
   //default settings 
   for(var r=0;r<defaultset.relaylist.length;r++){
     form0.relayliststr.value += defaultset.relaylist[r] + "\n";
@@ -88,6 +69,20 @@ window.onload=function(){
   form0.eid.value = defaultset.eid;
   form0.kind.value = 1;
 
+  //try to get settings from localStorage
+  var r = localStorage.getItem("settings");
+  if(r!==null){
+    var urlsp = new URLSearchParams(r);
+    urlsp2form(urlsp);
+  }
+
+  //try to get settings from HTTP query
+  var urlsp = getaddr();
+  var isbyquery = urlsp2form(urlsp);
+  if(isbyquery){ // does query set any form
+    //auto start check
+    startcheckrelays();
+  }
 }
 var handle_copy_button=function(){
   const url = form2url();
@@ -115,33 +110,33 @@ var setaddr=function(url){
   prevurl=url;
 }
 var prevurl = "";
-var url2form=function(urlsp){
-  var ready = true;
+var urlsp2form=function(urlsp){
+  var isset = false;
   if(urlsp.has('eid')){
     form0.eid.value = urlsp.get('eid');
+    isset = true;
   }else if(urlsp.has('noteid')){ // support old version
     form0.eid.value = urlsp.get('noteid');
-  }else{
-    ready=false;
+    isset = true;
   }
   if(urlsp.has('kind')){
     form0.kind.value = urlsp.get('kind');
-  }else{
-    ready=false;
+    isset = true;
   }
   if(urlsp.has('relay')){
     form0.relayliststr.value = urlsp.get('relay').replace(/;/g,"\n");
-  }else{
-    ready=false;
+    isset = true;
   }
-  return ready;
+  return isset;
 }
 var form2url=function(){
   var query="";
-  query += "eid=" + form0.eid.value;
-  query += "&kind=" + form0.kind.value;
-  query += "&relay=" + form0.relayliststr.value.replace(/\n/g,';');
-  var url = location.origin+location.pathname+"?"+query;
+  if(form0.eid .value!="") query += "&eid="  + form0.eid .value;
+  if(form0.kind.value!="") query += "&kind=" + form0.kind.value;
+  if(form0.relayliststr.value!=""){
+    query += "&relay=" + form0.relayliststr.value.replace(/\n/g,';');
+  }
+  var url = location.origin+location.pathname+"?"+query.slice(1);
   return url;
 }
 var initHtml=(lang)=>{
