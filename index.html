@@ -9,7 +9,7 @@
   </head>
   <body>
     <h1>nostr-post-checker</h1>
-    <form name=form0 class="fullwidth compact">
+    <form name=form0 class="fullwidth inputform">
       <span class="langja">イベントがどのリレーに存在し、どのリレーに存在していないかを確認するサイトです。</span>
       <span class="langen">You can check which relay servers the event exists on and which do not.</span>
       <table style="width:100%">
@@ -31,7 +31,6 @@
         <span class="langja"><input type="button" value="リレーリストを取得" onclick="javascript:put_my_relays(10002);"> (NIP-07, kind:10002 r tag)</span><br>
         <textarea class="tarelay" style="width:100%" id="relayliststr" name="relayliststr" rows="10"></textarea><br>
         <button name="req"  type="button" onclick="javascript:handle_search_button();">search</button>
-        <button name="copy" type="button" onclick="javascript:handle_copy_button()  ;">copy URL</button>
       </div>
       <p></p>
     </form>
@@ -40,8 +39,10 @@
     <table style="width:100%" id="result"></table>
     <form name=form1>
       <div>
-        <input type="checkbox" name="formcheck" onclick="showform();" checked>show form
-        <input type="checkbox" name="debugcheck" onclick="showdebug();">show debug
+        <input type="checkbox" class="checkbox" name="formcheck"  onclick="showform();" checked>show form
+        <input type="checkbox" class="checkbox" name="pvcheck"    onclick="showpv();"   checked>show pv
+        <input type="checkbox" class="checkbox" name="debugcheck" onclick="showdebug();"       >show debug
+        <button name="copy" type="button" onclick="javascript:handle_copy_button()  ;">copy URL</button>
         <br>
         <span class="debugout">debug:</span>
         <textarea name="debugout" class="debugout" style="width:100%" rows="16"></textarea>

@@ -136,7 +136,9 @@ dd {
     font-size: 0.9rem; /* increased font size for better readability */
     padding: 0.05rem 0;
 }
-
+.checkbox {
+    accent-color: #888888
+}
 .noborder {
     border-style: none;
 }
