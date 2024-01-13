@@ -1,4 +1,4 @@
-var version = "1.30";
+var version = "1.31";
 var debug_extension_emulated=false;
 if(debug_extension_emulated){
   window.nostr = function(){};
@@ -168,6 +168,13 @@ var showdebug = function(){
 }
 var startcheckrelays=function(){
   iserror = false;
+  relaylist = form0.relayliststr.value.replace(/\n\n*/g,"\n").replace(/\n$/,"").split("\n");
+  relays = relaylist.length;
+
+  /* clear result table */
+  while(table.firstChild){
+    table.removeChild(table.firstChild);
+  }
 
   /* check id */
   let n;
@@ -177,25 +184,21 @@ var startcheckrelays=function(){
     n = 0;
   }
   var ishex=false;
-  if(form0.eid.value.substr(n, 4) == "note" || form0.eid.value.substr(n, 6) == "nevent"){
+  if(form0.eid.value.substr(n, 4) == "note" 
+  || form0.eid.value.substr(n, 6) == "nevent"){
     filter=["ids","id"];
-  }else if(form0.eid.value.substr(n, 4) == "npub" || form0.eid.value.substr(n, 8) == "nprofile"){
+  }else if(form0.eid.value.substr(n, 4) == "npub"
+        || form0.eid.value.substr(n, 8) == "nprofile"){
     filter=["authors","pubkey"]
   }else if(form0.eid.value.replace(/[a-fA-F0-9]+/g,'').length==0){
     ishex=true;
     filter=["ids","id"];
-  }else{
-    /* invalid id */
+  }else{ /* invalid id */
     iserror = true;
     document.getElementById("time").innerHTML = "Invalid id. id should start from npub or nprofile or note or nevent."
   }
 
-  while(table.firstChild){
-    table.removeChild(table.firstChild);
-  }
-
-  relaylist = form0.relayliststr.value.replace(/\n\n*/g,"\n").replace(/\n$/,"").split("\n");
-  relays = relaylist.length;
+  /* handle id error */
   if(iserror){
     ws = new Array(relays); // ws[r]
     for(var r=0;r<relays;r++){
@@ -210,10 +213,12 @@ var startcheckrelays=function(){
     }
     return;
   }
-  ws = new Array(relays); // ws[r]
+
+  /* open websockets */
+  ws = new Array(relays); // ws[r] = websocket for relay r
   for(var r=0;r<relays;r++){
     uuid = genuuid();
-    ws[r] = new WebSocket(relaylist[r]);
+    ws[r] = new WebSocket(relaylist[r]); /* websocket */
     ws[r].uuid = uuid;
     ws[r].r = r;
     ws[r].status = "idle";
@@ -226,17 +231,20 @@ var startcheckrelays=function(){
     }
     ws[r].onmessage = function(m){
       var r=this.r;
-      print("recv : "+relaylist[this.r]+"\n");
-      ws[r].recv.push(JSON.parse(m.data));
+      print("recv: "+relaylist[this.r]+"\n");
       //print("received message from ws["+relaylist[r]+"]='"+m.data+"'\n");
+      var e=JSON.parse(m.data);
+      ws[r].recv.push(e);
+      if(e[0]=='EVENT')previewevent(e[2]);
+      if(e[0]=='EOSE')print("eose: "+relaylist[r]+"\n");
       ws[r].close();
       ws[r].status = "received";
       drawresult(r);
     };
     ws[r].onopen = function(e){
       var r = this.r;
+      print("open: "+relaylist[this.r]+"\n");
       //print("ws["+relaylist[r]+"] was opened.\n");
-
       //making notehex
       if(form0.eid.value.substr(0, 6) == "nostr:"){
         noteObj = window.NostrTools.nip21.parse(form0.eid.value);
@@ -478,4 +486,25 @@ async function get_my_relays(kind){
   });
   return resultlist;
 }
-
+/* try to preview the content and time of event e. */
+var previewevent = function(e){
+  var str = "";
+  str += new Date(e.created_at*1000)+"<br>";
+  str += escape_html(e.content).replace(/\n/g,"<br>");
+  pvnote.innerHTML=str;
+}
+function escape_html(s){
+  if(typeof s !== 'string') {
+    return s;
+  }
+  return s.replace(/[&'`"<>]/g, function(match) {
+    return {
+      '&': '&amp;',
+      "'": '&#x27;',
+      '`': '&#x60;',
+      '"': '&quot;',
+      '<': '&lt;',
+      '>': '&gt;',
+    }[match]
+  });
+}

@@ -29,14 +29,14 @@
         <br>
         <span class="langen"><input type="button" value="Get your relay list" onclick="javascript:put_my_relays(10002);"> by NIP-07 and kind:10002 r tags</span>
         <span class="langja"><input type="button" value="リレーリストを取得" onclick="javascript:put_my_relays(10002);"> (NIP-07, kind:10002 r tag)</span><br>
-        <textarea style="width:100%" id="relayliststr" name="relayliststr" rows="10"></textarea><br>
+        <textarea class="tarelay" style="width:100%" id="relayliststr" name="relayliststr" rows="10"></textarea><br>
         <button name="req"  type="button" onclick="javascript:handle_search_button();">search</button>
         <button name="copy" type="button" onclick="javascript:handle_copy_button()  ;">copy URL</button>
       </div>
       <p></p>
     </form>
     result:<span id="time"></span>
-    <table style="width:100%"><tr><td class="tdnote" id="tdnote"></td></tr></table>
+    <div class="pvnote" id="pvnote">&nbsp;</div>
     <table style="width:100%" id="result"></table>
     <form name=form1>
       <div>
@@ -44,7 +44,7 @@
         <input type="checkbox" name="debugcheck" onclick="showdebug();">show debug
         <br>
         <span class="debugout">debug:</span>
-        <textarea name="debugout" class="debugout" rows="30"></textarea>
+        <textarea name="debugout" class="debugout" style="width:100%" rows="16"></textarea>
       </div>
     </form>
     <hr>
