@@ -9,11 +9,9 @@
   </head>
   <body>
     <h1>nostr-post-checker</h1>
-    <p>
-    <span class="langja">イベントがどのリレーに存在し、どのリレーに存在していないかを確認するサイトです。</span>
-    <span class="langen">You can check which relay servers the event exists on and which do not.</span>
-    </p>
-    <form name=form0 class="fullwidth">
+    <form name=form0 class="fullwidth compact">
+      <span class="langja">イベントがどのリレーに存在し、どのリレーに存在していないかを確認するサイトです。</span>
+      <span class="langen">You can check which relay servers the event exists on and which do not.</span>
       <table style="width:100%">
         <tr>
           <td style="width:5em"><label for="eid">event id:</label></td>
@@ -35,12 +33,18 @@
         <button name="req"  type="button" onclick="javascript:handle_search_button();">search</button>
         <button name="copy" type="button" onclick="javascript:handle_copy_button()  ;">copy URL</button>
       </div>
+      <p></p>
     </form>
-    <p>result:<span id="time"></span></p>
+    result:<span id="time"></span>
+    <table style="width:100%"><tr><td class="tdnote" id="tdnote"></td></tr></table>
     <table style="width:100%" id="result"></table>
     <form name=form1>
-      <div>debug:<input type="checkbox" name="debugcheck" onclick="showdebug();">show debug<br>
-      <textarea name="debugout" class="debugout" rows="30"></textarea>
+      <div>
+        <input type="checkbox" name="formcheck" onclick="showform();" checked>show form
+        <input type="checkbox" name="debugcheck" onclick="showdebug();">show debug
+        <br>
+        <span class="debugout">debug:</span>
+        <textarea name="debugout" class="debugout" rows="30"></textarea>
       </div>
     </form>
     <hr>

@@ -92,6 +92,13 @@ address {
     height: 30px;
     width: 100%; /* changed to percentage */
 }
+.tdnote{
+    border-width: 0.01rem;
+    border-style: solid;
+    height: 1.8rem;
+    padding: 0 0.3rem;
+}
+
 
 hr {
     border-style: solid;

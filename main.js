@@ -1,4 +1,4 @@
-var version = "1.29";
+var version = "1.30";
 var debug_extension_emulated=false;
 if(debug_extension_emulated){
   window.nostr = function(){};
@@ -150,11 +150,20 @@ var initHtml=(lang)=>{
     ja.map((x)=>x.style.display='none'  );
   }
 }
-var showdebug = function(){
-  if(form1.debugcheck.checked){
-    document.getElementsByClassName('debugout')[0].style.display='block';
+var showform = function(){
+  var e = Array.from(document.getElementsByClassName('compact'));
+  if(form1.formcheck.checked){
+    e.map(x=>{x.style.display='block';});
   }else{
-    document.getElementsByClassName('debugout')[0].style.display='none';
+    e.map(x=>{x.style.display='none';});
+  }
+}
+var showdebug = function(){
+  var e = Array.from(document.getElementsByClassName('debugout'));
+  if(form1.debugcheck.checked){
+    e.map(x=>{x.style.display='block';});
+  }else{
+    e.map(x=>{x.style.display='none';});
   }
 }
 var startcheckrelays=function(){
