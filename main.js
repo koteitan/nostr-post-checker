@@ -1,4 +1,4 @@
-var version = "1.33";
+var version = "1.33.1";
 var debug_extension_emulated=false;
 if(debug_extension_emulated){
   window.nostr = function(){};
@@ -173,7 +173,7 @@ var showform = function(){
   }
 }
 var showpv = function(){
-  var e = Array.from(document.getElementsByClassName('pvnote'));
+  var e = Array.from(document.getElementsByClassName('divpvnote'));
   if(form1.pvcheck.checked){
     e.map(x=>{x.style.display='block';});
   }else{
