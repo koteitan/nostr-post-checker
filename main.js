@@ -1,4 +1,4 @@
-var version = "1.33.1";
+var version = "1.33.2";
 var debug_extension_emulated=false;
 if(debug_extension_emulated){
   window.nostr = function(){};
@@ -210,7 +210,8 @@ var startcheckrelays=function(){
     table.removeChild(table.firstChild);
   }
   update_pvprof("","","");
-  proftime = 0;
+  pvproftime = 0;
+  pvnotetime = 0;
 
   /* check id */
   iserror = false;
@@ -525,16 +526,20 @@ async function get_my_relays(kind){
   return resultlist;
 }
 /* try to preview the content and time of event e. */
+var pvnotetime = 0;
 var pvevent = function(e, ws){
-  if(e.created_at !== undefined){
+  //update note
+  if(e.created_at !== undefined && e.created_at > pvnotetime){
+    pvnotetime = e.created_at;
     var str = "";
     pvtime.innerHTML = new Date(e.created_at*1000);
     if(e.content !== undefined) str += escape_html(e.content).replace(/\n/g,"<br>");
     pvnote.innerHTML = str;
-    if(e.pubkey !== undefined && ws.prof_search_state=="idle") search_prof(e, ws);
   }
+  //update profile
+  if(e.pubkey !== undefined && ws.prof_search_state=="idle") search_prof(e, ws);
 }
-var proftime = 0;
+var pvproftime = 0;
 var search_prof = function(e, ws0){
   ws0.prof_search_state = "opening";
   var ws = new WebSocket(relaylist[ws0.r]); /* websocket */
@@ -545,8 +550,8 @@ var search_prof = function(e, ws0){
   ws.onmessage = function(m){ /* got kind:0 */
     var recv=JSON.parse(m.data);
     var reqclose = false;
-    if(recv[0]=="EVENT" && recv[2].created_at > proftime){
-      proftime = recv[2].created_at;
+    if(recv[0]=="EVENT" && recv[2].created_at > pvproftime){
+      pvproftime = recv[2].created_at;
       if(recv[2].content !== undefined){
         var content = JSON.parse(recv[2].content);
         var name  = "";
