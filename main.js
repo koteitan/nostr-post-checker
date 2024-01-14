@@ -1,4 +1,4 @@
-var version = "1.32";
+var version = "1.33";
 var debug_extension_emulated=false;
 if(debug_extension_emulated){
   window.nostr = function(){};
@@ -189,16 +189,31 @@ var showdebug = function(){
   }
 }
 var startcheckrelays=function(){
-  iserror = false;
+  /* clear websockets */
+  if(ws !==undefined && Array.isArray(ws)){
+    for(var r=0;r<ws.length;r++){
+      if(ws[r].readyState == 0 || ws[r].readyState == 1){
+        try{
+          ws[r].close();
+          print("closed by startcheckrelays(): "+relaylist[r]+"\n");
+        }catch(e){
+          print("error on startcheckrelays(): ws[r].close(): "+e+": "+relaylist[r]+"\n");
+        }
+      }
+    }
+  }
   relaylist = form0.relayliststr.value.replace(/\n\n*/g,"\n").replace(/\n$/,"").split("\n");
   relays = relaylist.length;
 
-  /* clear result table */
+  /* clear UIs */
   while(table.firstChild){
     table.removeChild(table.firstChild);
   }
+  update_pvprof("","","");
+  proftime = 0;
 
   /* check id */
+  iserror = false;
   let n;
   if(form0.eid.value.substr(0, 6) == "nostr:"){
     n = 6;
@@ -245,8 +260,9 @@ var startcheckrelays=function(){
     ws[r].r = r;
     ws[r].status = "idle";
     ws[r].recv = [];
+    ws[r].prof_search_state = "idle";
     ws[r].onerror = function(e){
-      print("error: "+relaylist[this.r]+" :ws[r].onerror\n");
+      print("error: ws[r].onerror: "+relaylist[this.r]+"\n");
       if(ws[this.r].status != "received"){
         ws[this.r].status = "error";
       }
@@ -257,7 +273,7 @@ var startcheckrelays=function(){
       //print("received message from ws["+relaylist[r]+"]='"+m.data+"'\n");
       var e=JSON.parse(m.data);
       ws[r].recv.push(e);
-      if(e[0]=='EVENT')previewevent(e[2]);
+      if(e[0]=='EVENT')pvevent(e[2], ws[r]);
       if(e[0]=='EOSE')print("eose: "+relaylist[r]+"\n");
       ws[r].close();
       ws[r].status = "received";
@@ -436,7 +452,7 @@ put_my_relays = async function(kind){
         form0.relayliststr.value += relay + "\n";
       }
     }catch(e){
-      form0.relayliststr.value = e;
+      document.getElementById("time").innerHTML = e;
     }
 }
 async function get_my_relays(kind){
@@ -509,13 +525,75 @@ async function get_my_relays(kind){
   return resultlist;
 }
 /* try to preview the content and time of event e. */
-var previewevent = function(e){
-  var str = "";
-  str += new Date(e.created_at*1000)+"<br>";
-  str += escape_html(e.content).replace(/\n/g,"<br>");
-  pvnote.innerHTML=str;
+var pvevent = function(e, ws){
+  if(e.created_at !== undefined){
+    var str = "";
+    pvtime.innerHTML = new Date(e.created_at*1000);
+    if(e.content !== undefined) str += escape_html(e.content).replace(/\n/g,"<br>");
+    pvnote.innerHTML = str;
+    if(e.pubkey !== undefined && ws.prof_search_state=="idle") search_prof(e, ws);
+  }
 }
-function escape_html(s){
+var proftime = 0;
+var search_prof = function(e, ws0){
+  ws0.prof_search_state = "opening";
+  var ws = new WebSocket(relaylist[ws0.r]); /* websocket */
+  ws.uuid = genuuid();
+  ws.onerror = function(e){
+    print("error: "+relaylist[ws0.r]+" :search_profile:ws.onerror\n");
+  };
+  ws.onmessage = function(m){ /* got kind:0 */
+    var recv=JSON.parse(m.data);
+    var reqclose = false;
+    if(recv[0]=="EVENT" && recv[2].created_at > proftime){
+      proftime = recv[2].created_at;
+      if(recv[2].content !== undefined){
+        var content = JSON.parse(recv[2].content);
+        var name  = "";
+        var dname = "";
+        var pic   = "";
+        if(content.name         !== undefined) name  = content.name;
+        if(content.display_name !== undefined) dname = content.display_name;
+        if(content.picture      !== undefined) pic   = content.picture;
+        update_pvprof(name, dname, pic);
+        ws0.prof_search_state = "found";
+        reqclose = true;
+        print("profile: found: "+relaylist[ws0.r]+"\n");
+      }
+    }else if(recv[0]=="EOSE"){
+      reqclose = true;
+      print("profile: eose: "+relaylist[ws0.r]+"\n");
+    }
+    if(reqclose){
+      var sentobj = ["CLOSE", ws.uuid];
+      var sentstr = JSON.stringify(sentobj);
+      ws.send(sentstr); /* websocket */
+      ws.close(); /* websocket */
+      ws0.prof_search_state = "closed";
+      print("profile: closed: "+relaylist[ws0.r]+"\n");
+    }
+  };
+  ws.onopen = function(recv){ /* opened */
+    var filter ={"authors":[e.pubkey],"kinds":[0]};
+    var sentobj=["REQ", ws.uuid, filter];
+    var sentstr = JSON.stringify(sentobj);
+    ws0.prof_search_state = "requesting";
+    ws.send(sentstr); /* websocket */
+    print("profile: opened: "+relaylist[ws0.r]+"\n");
+  };
+}
+var update_pvprof = function(name, dname, pic){
+  if(pic!=""){
+    imgicon.setAttribute("src", pic);
+    imgicon.style.display = "inline";
+  }else{
+    imgicon.style.display = "none";
+  }
+  if(name  != "") pvname .innerHTML = "(@"+escape_html(name)+")";
+  if(dname != "") pvdname.innerHTML = escape_html(dname);
+  
+}
+var escape_html = function(s){
   if(typeof s !== 'string') {
     return s;
   }

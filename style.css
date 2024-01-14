@@ -92,13 +92,19 @@ address {
     height: 30px;
     width: 100%; /* changed to percentage */
 }
-.pvnote {
+.divpvnote {
     overflow-y:scroll;
     border-width: 0.01rem;
     border-style: solid;
     max-height: 7.2rem;
     padding: 0 0.3rem;
     margin: 2px;
+}
+.imgicon {
+    width :48px;
+    height:48px;
+    border-radius:100%;
+    margin-right:6px;
 }
 .tarelay {
     margin: 2px;
