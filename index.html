@@ -6,12 +6,15 @@
     <meta http-equiv="Content-Style-Type" content="text/css">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@nikolat/makibishi@0.1.1"></script>
   </head>
   <body>
-    <h1>nostr-post-checker</h1>
-    <form name=form0 class="fullwidth inputform">
-      <span class="langja">イベントがどのリレーに存在し、どのリレーに存在していないかを確認するサイトです。</span>
-      <span class="langen">You can check which relay servers the event exists on and which do not.</span>
+	  <h1>nostr-post-checker<span class="makibishi" data-relays="wss://yabu.me,wss://relay.damus.io" data-url="https://koteitan.github.io/beta/nostr-post-checker/" datea-content="🤙" data-allow-anonymous-reaction="true"></span></h1>
+    <p>
+    <span class="langja">イベントがどのリレーに存在し、どのリレーに存在していないかを確認するサイトです。</span>
+    <span class="langen">You can check which relay servers the event exists on and which do not.</span>
+    </p>
+    <form name=form0 class="fullwidth">
       <table style="width:100%">
         <tr>
           <td style="width:5em"><label for="eid">event id:</label></td>
@@ -29,34 +32,16 @@
         <br>
         <span class="langen"><input type="button" value="Get your relay list" onclick="javascript:put_my_relays(10002);"> by NIP-07 and kind:10002 r tags</span>
         <span class="langja"><input type="button" value="リレーリストを取得" onclick="javascript:put_my_relays(10002);"> (NIP-07, kind:10002 r tag)</span><br>
-        <textarea class="tarelay" style="width:100%" id="relayliststr" name="relayliststr" rows="10"></textarea><br>
+        <textarea style="width:100%" id="relayliststr" name="relayliststr" rows="10"></textarea><br>
         <button name="req"  type="button" onclick="javascript:handle_search_button();">search</button>
+        <button name="copy" type="button" onclick="javascript:handle_copy_button()  ;">copy URL</button>
       </div>
-      <p></p>
     </form>
-    result:<span id="time"></span>
-    <div class="divpvnote" id="divpvnote">
-      <table><tr>
-        <td id="tdicon" style="vertical-align:text-top">
-          <img id="imgicon" class="imgicon" style="display:none"/>
-        </td>
-        <td id="tdnote">
-          <span id="pvtime"></span><br>
-          <span id="pvdname"></span>&nbsp;<span id="pvname"></span><br>
-          <span id="pvnote"></span>
-        </td>
-      </tr></table>
-    </div>
+    <p>result:<span id="time"></span></p>
     <table style="width:100%" id="result"></table>
     <form name=form1>
-      <div>
-        <input type="checkbox" class="checkbox" name="formcheck"  onclick="showform();" checked>show form
-        <input type="checkbox" class="checkbox" name="pvcheck"    onclick="showpv();"   checked>show pv
-        <input type="checkbox" class="checkbox" name="debugcheck" onclick="showdebug();"       >show debug
-        <button name="copy" type="button" onclick="javascript:handle_copy_button()  ;">copy URL</button>
-        <br>
-        <span class="debugout">debug:</span>
-        <textarea name="debugout" class="debugout" style="width:100%" rows="16"></textarea>
+      <div>debug:<input type="checkbox" name="debugcheck" onclick="showdebug();">show debug<br>
+      <textarea name="debugout" class="debugout" rows="30"></textarea>
       </div>
     </form>
     <hr>
@@ -80,7 +65,7 @@
     </ul>
     <address>
       <a href="./">nostr-post-checker</a> version <span id="version">unloaded</span><br>
-        Programmed by <a href="https://nostter.app/koteitan.github.io">koteitan</a> and 2 contributors<br>
+        Programmed by <a href="https://iris.to/koteitan">koteitan</a> and 2 contributors<br>
         Source code is on <a href="https://github.com/koteitan/nostr-post-checker">github</a><br>
         The program and the site is licensed by <a href="https://github.com/koteitan/nostr-post-checker/blob/master/LICENSE.md">MIT License</a>.
     </address>
