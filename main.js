@@ -1,12 +1,12 @@
-var version = "1.36";
-var debug_extension_emulated=false;
+const version = "1.37";
+const debug_extension_emulated=false;
 if(debug_extension_emulated){
   window.nostr = function(){};
   window.nostr.getRelays    = function(){return debug_relaylist;};
   window.nostr.getPublicKey = function(){return defaultset.mypubkey;};
   window.NostrTools = function(){};
 }
-var defaultset=function(){};
+const defaultset=function(){};
 defaultset.mypubkey="4c5d5379a066339c88f6e101e3edb1fbaee4ede3eea35ffc6f1c664b3a4383ee";
 defaultset.eid="note15zl6ruufd5hcj0xmhq9r8yczjy2xt278qzn97e9zuc3dg36lkufq4326xp";
 defaultset.relaylist=[// cf. https://docs.google.com/spreadsheets/d/16PPbdUiGhcgsSmZueio3CbjF95_11sKDgOGN0r9LBJ0/edit#gid=0
@@ -24,7 +24,7 @@ defaultset.relaylist=[// cf. https://docs.google.com/spreadsheets/d/16PPbdUiGhcg
   "wss://nostr-relay.nokotaro.com",
   "wss://nostr.holybea.com",
 ];
-var debug_relaylist={
+const debug_relaylist={
   "wss://yabu.me"                :{read:true, write:true},
   "wss://nostr1.tunnelsats.com"  :{read:true, write:true},
   "wss://nostr-01.bolt.observer" :{read:true, write:true},
@@ -45,40 +45,40 @@ if(false){
     "ws://localhost:6969",
   ];
 }
-var relays;
-var notehex;
-var ws;
-var curms=-1;
-var nextms=-1;
-var filter;
-var iserror;
-var uuid;
+let relays;
+let notehex;
+let ws;
+let curms=-1;
+let nextms=-1;
+let filter;
+let iserror;
+let uuid;
 window.onload=function(){
   //show version
   document.getElementById('version').innerHTML=version;
 
   initHtml(navigator.language);
   
-  var isfromquery = false;
-  var isfromls    = false;
+  let isfromquery = false;
+  let isfromls    = false;
 
   //default settings 
-  for(var r=0;r<defaultset.relaylist.length;r++){
+  for(let r=0;r<defaultset.relaylist.length;r++){
     form0.relayliststr.value += defaultset.relaylist[r] + "\n";
   }
   form0.eid.value = defaultset.eid;
   form0.kind.value = 1;
 
   //try to get settings from localStorage
-  var r = localStorage.getItem("settings");
+  const r = localStorage.getItem("settings");
   if(r!==null){
-    var urlsp = new URLSearchParams(r);
+    const urlsp = new URLSearchParams(r);
     urlsp2form(urlsp);
   }
 
   //try to get settings from HTTP query
-  var urlsp = getaddr();
-  var isbyquery = urlsp2form(urlsp);
+  const urlsp = getaddr();
+  const isbyquery = urlsp2form(urlsp);
   if(isbyquery){ // does query set any form
     //auto start check
     startcheckrelays();
@@ -86,22 +86,22 @@ window.onload=function(){
   showform();
   showpv();
 }
-var handle_copy_button=function(){
+const handle_copy_button=function(){
   const url = form2url();
   navigator.clipboard.writeText(url);
 }
-var handle_search_button=function(){
-  var str=form2url();
+const handle_search_button=function(){
+  let str=form2url();
   str="?"+str.split("?")[1];
   localStorage.setItem("settings", str);
   startcheckrelays();
 }
 /* return browser address */
-var getaddr=function(){
+const getaddr=function(){
   return new URLSearchParams(window.location.search);
 }
 /* set url into browser address, and jump. (no url, no query) */
-var setaddr=function(url){
+const setaddr=function(url){
   if(url === undefined){
     url = location.origin+location.pathname;
   }
@@ -111,9 +111,9 @@ var setaddr=function(url){
   }
   prevurl=url;
 }
-var prevurl = "";
-var urlsp2form=function(urlsp){
-  var isset = false;
+let prevurl = "";
+const urlsp2form=function(urlsp){
+  let isset = false;
   if(urlsp.has('hidepv')){
     form1.pvcheck.checked = false;
   }else{
@@ -141,8 +141,8 @@ var urlsp2form=function(urlsp){
   }
   return isset;
 }
-var form2url=function(){
-  var query="";
+const form2url=function(){
+  let query="";
   if(!form1.formcheck.checked) query += "&hideform";
   if(!form1.pvcheck  .checked) query += "&hidepv";
   if( form0.eid .value!=""   ) query += "&eid="  + form0.eid .value;
@@ -150,12 +150,12 @@ var form2url=function(){
   if( form0.relayliststr.value!=""){
     query += "&relay=" + form0.relayliststr.value.replace(/\n/g,';');
   }
-  var url = location.origin+location.pathname+"?"+query.slice(1);
+  const url = location.origin+location.pathname+"?"+query.slice(1);
   return url;
 }
-var initHtml=(lang)=>{
-  var ja = Array.from(document.getElementsByClassName('langja'));
-  var en = Array.from(document.getElementsByClassName('langen'));
+const initHtml=(lang)=>{
+  let ja = Array.from(document.getElementsByClassName('langja'));
+  let en = Array.from(document.getElementsByClassName('langen'));
   if(lang=='ja'){
     ja.map((x)=>x.style.display='inline');
     en.map((x)=>x.style.display='none'  );
@@ -164,34 +164,34 @@ var initHtml=(lang)=>{
     ja.map((x)=>x.style.display='none'  );
   }
 }
-var showform = function(){
-  var e = Array.from(document.getElementsByClassName('inputform'));
+const showform = function(){
+  let e = Array.from(document.getElementsByClassName('inputform'));
   if(form1.formcheck.checked){
     e.map(x=>{x.style.display='block';});
   }else{
     e.map(x=>{x.style.display='none';});
   }
 }
-var showpv = function(){
-  var e = Array.from(document.getElementsByClassName('divpvnote'));
+const showpv = function(){
+  let e = Array.from(document.getElementsByClassName('divpvnote'));
   if(form1.pvcheck.checked){
     e.map(x=>{x.style.display='block';});
   }else{
     e.map(x=>{x.style.display='none';});
   }
 }
-var showdebug = function(){
-  var e = Array.from(document.getElementsByClassName('debugout'));
+const showdebug = function(){
+  let e = Array.from(document.getElementsByClassName('debugout'));
   if(form1.debugcheck.checked){
     e.map(x=>{x.style.display='block';});
   }else{
     e.map(x=>{x.style.display='none';});
   }
 }
-var startcheckrelays=function(){
+const startcheckrelays=function(){
   /* clear websockets */
   if(ws !==undefined && Array.isArray(ws)){
-    for(var r=0;r<ws.length;r++){
+    for(let r=0;r<ws.length;r++){
       if(ws[r].readyState == 0 || ws[r].readyState == 1){
         try{
           ws[r].close();
@@ -221,7 +221,7 @@ var startcheckrelays=function(){
   }else{
     n = 0;
   }
-  var ishex=false;
+  let ishex=false;
   if(form0.eid.value.substr(n, 4) == "note" 
   || form0.eid.value.substr(n, 6) == "nevent"){
     filter=["ids","id"];
@@ -239,13 +239,13 @@ var startcheckrelays=function(){
   /* handle id error */
   if(iserror){
     ws = new Array(relays); // ws[r]
-    for(var r=0;r<relays;r++){
+    for(let r=0;r<relays;r++){
       ws[r] = new Object;
     }
     preparetable();
-    for(var r=0;r<relays;r++){
-      var td1 = ws[r].td;
-      var recv = ws[r].recv;
+    for(let r=0;r<relays;r++){
+      let td1 = ws[r].td;
+      let recv = ws[r].recv;
       td1.innerHTML = "id is invalid";
       td1.setAttribute("class","tderror");
     }
@@ -254,7 +254,7 @@ var startcheckrelays=function(){
 
   /* open websockets */
   ws = new Array(relays); // ws[r] = websocket for relay r
-  for(var r=0;r<relays;r++){
+  for(let r=0;r<relays;r++){
     uuid = genuuid();
     ws[r] = new WebSocket(relaylist[r]); /* websocket */
     ws[r].uuid = uuid;
@@ -269,10 +269,10 @@ var startcheckrelays=function(){
       }
     }
     ws[r].onmessage = function(m){
-      var r=this.r;
+      let r=this.r;
       print("recv: "+relaylist[this.r]+"\n");
       //print("received message from ws["+relaylist[r]+"]='"+m.data+"'\n");
-      var e=JSON.parse(m.data);
+      let e=JSON.parse(m.data);
       ws[r].recv.push(e);
       if(e[0]=='EVENT')pvevent(e[2], ws[r]);
       if(e[0]=='EOSE')print("eose: "+relaylist[r]+"\n");
@@ -281,7 +281,7 @@ var startcheckrelays=function(){
       drawresult(r);
     };
     ws[r].onopen = function(e){
-      var r = this.r;
+      let r = this.r;
       print("open: "+relaylist[this.r]+"\n");
       //print("ws["+relaylist[r]+"] was opened.\n");
       //making notehex
@@ -317,9 +317,9 @@ var startcheckrelays=function(){
         }
       }
 
-      var eventFilter = {[filter[0]]:[notehex],"kinds":[parseInt(form0.kind.value)]};
+      let eventFilter = {[filter[0]]:[notehex],"kinds":[parseInt(form0.kind.value)]};
 
-      var sendobj=[
+      let sendobj=[
         "REQ",
         ws[r].uuid,
         eventFilter  
@@ -336,18 +336,18 @@ var startcheckrelays=function(){
   setTimeout(checkmsg, nextms);
   timer=setInterval(checktime, nextms);
 }
-var timer;
-var timeout=60000;
-var checktime=function(){
+let timer;
+let timeout=60000;
+const checktime=function(){
   if(!iserror){
     if(curms!=-1 && nextms!=-1){
       document.getElementById("time").innerHTML = " left "+Math.floor((timeout-curms)/1000)+" seconds until timeout";
     }
   }
 }
-var checkmsg = function(){
-  var yet=false;
-  for(var r=0;r<relays;r++){
+const checkmsg = function(){
+  let yet=false;
+  for(let r=0;r<relays;r++){
     if(ws[r].status=="idle" || ws[r].status=="sent"){
       yet=true;
     }
@@ -365,21 +365,21 @@ var checkmsg = function(){
   nextms = -1;
   drawresultall();
 }
-var drawresultall=function(){
-  for(var r=0;r<relays;r++)drawresult(r);
+const drawresultall=function(){
+  for(let r=0;r<relays;r++)drawresult(r);
 }
-var table = document.getElementById("result");
-var preparetable = function(){
-  for(var r=0;r<relays;r++){
-    var tr = document.createElement("tr");
+const table = document.getElementById("result");
+const preparetable = function(){
+  for(let r=0;r<relays;r++){
+    let tr = document.createElement("tr");
     table.appendChild(tr);
 
-    var td0 = document.createElement("td");
+    let td0 = document.createElement("td");
     td0.innerHTML = "connecting...";
     td0.setAttribute("class","tdcon");
     tr.appendChild(td0);
 
-    var td1 = document.createElement("td");
+    let td1 = document.createElement("td");
     td1.innerHTML = relaylist[r];
     td1.setAttribute("class","tdrelay");
     tr.appendChild(td1);
@@ -387,9 +387,9 @@ var preparetable = function(){
     ws[r].td = td0;
   }
 }
-var drawresult = function(r){
-  var td1 = ws[r].td;
-  var recv = ws[r].recv;
+const drawresult = function(r){
+  let td1 = ws[r].td;
+  let recv = ws[r].recv;
   switch(ws[r].status){
     case "idle":
       td1.innerHTML = "can't open";
@@ -426,11 +426,11 @@ var drawresult = function(r){
   }
 }
 
-var print = function(m){
+const print = function(m){
   form1.debugout.value += m;
 }
 
-var genuuid = function(){
+const genuuid = function(){
   let chars = "xxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx".split("");
   for (let i = 0, len = chars.length; i < len; i++) {
     switch (chars[i]) {
@@ -447,7 +447,7 @@ var genuuid = function(){
 put_my_relays = async function(kind){
     form0.relayliststr.value = "wait for your relays...";
     try{
-      var list = await get_my_relays(kind);
+      let list = await get_my_relays(kind);
       form0.relayliststr.value = "";
       for(relay of list){
         form0.relayliststr.value += relay + "\n";
@@ -457,19 +457,19 @@ put_my_relays = async function(kind){
     }
 }
 async function get_my_relays(kind){
-  var bsrelay;
+  let bsrelay;
   if(window.nostr !== undefined){
     bsrelay = await window.nostr.getRelays();
   }else{
     throw "Please set NIP-07 browser extension."
   }
-  var relaylist = Object.keys(bsrelay);
-  var filter = [{"kinds":[kind],"authors":[await window.nostr.getPublicKey()]}];
-  var resultlist = await Promise.allSettled(relaylist.map(async (url)=>{
-    var result = [];
+  let relaylist = Object.keys(bsrelay);
+  let filter = [{"kinds":[kind],"authors":[await window.nostr.getPublicKey()]}];
+  let resultlist = await Promise.allSettled(relaylist.map(async (url)=>{
+    let result = [];
 
     await Promise.race([new Promise(async (resolve, reject)=>{
-      var relay = window.NostrTools.relayInit(url);
+      let relay = window.NostrTools.relayInit(url);
       relay.on("error",()=>{
         reject();
       });
@@ -494,7 +494,7 @@ async function get_my_relays(kind){
             origin   :url,
           });
         }else if(kind==10002){
-          var rl=[];
+          let rl=[];
           for(t of ev.tags){
             rl.push(t[1]);
           }
@@ -526,12 +526,12 @@ async function get_my_relays(kind){
   return resultlist;
 }
 /* try to preview the content and time of event e. */
-var pvnotetime = 0;
-var pvevent = function(e, ws){
+let pvnotetime = 0;
+const pvevent = function(e, ws){
   //update note
   if(e.created_at !== undefined && e.created_at > pvnotetime){
     pvnotetime = e.created_at;
-    var str = "";
+    let str = "";
     pvtime.innerHTML = new Date(e.created_at*1000);
     if(e.content !== undefined) str += escape_html(e.content).replace(/\n/g,"<br>");
     pvnote.innerHTML = str;
@@ -539,24 +539,24 @@ var pvevent = function(e, ws){
   //update profile
   if(e.pubkey !== undefined && ws.prof_search_state=="idle") search_prof(e, ws);
 }
-var pvproftime = 0;
-var search_prof = function(e, ws0){
+let pvproftime = 0;
+const search_prof = function(e, ws0){
   ws0.prof_search_state = "opening";
-  var ws = new WebSocket(relaylist[ws0.r]); /* websocket */
+  let ws = new WebSocket(relaylist[ws0.r]); /* websocket */
   ws.uuid = genuuid();
   ws.onerror = function(e){
     print("error: "+relaylist[ws0.r]+" :search_profile:ws.onerror\n");
   };
   ws.onmessage = function(m){ /* got kind:0 */
-    var recv=JSON.parse(m.data);
-    var reqclose = false;
+    let recv=JSON.parse(m.data);
+    let reqclose = false;
     if(recv[0]=="EVENT" && recv[2].created_at > pvproftime){
       pvproftime = recv[2].created_at;
       if(recv[2].content !== undefined){
-        var content = JSON.parse(recv[2].content);
-        var name  = "";
-        var dname = "";
-        var pic   = "";
+        let content = JSON.parse(recv[2].content);
+        let name  = "";
+        let dname = "";
+        let pic   = "";
         if(content.name         !== undefined) name  = content.name;
         if(content.display_name !== undefined) dname = content.display_name;
         if(content.picture      !== undefined) pic   = content.picture;
@@ -570,8 +570,8 @@ var search_prof = function(e, ws0){
       print("profile: eose: "+relaylist[ws0.r]+"\n");
     }
     if(reqclose){
-      var sentobj = ["CLOSE", ws.uuid];
-      var sentstr = JSON.stringify(sentobj);
+      let sentobj = ["CLOSE", ws.uuid];
+      let sentstr = JSON.stringify(sentobj);
       ws.send(sentstr); /* websocket */
       ws.close(); /* websocket */
       ws0.prof_search_state = "closed";
@@ -579,15 +579,15 @@ var search_prof = function(e, ws0){
     }
   };
   ws.onopen = function(recv){ /* opened */
-    var filter ={"authors":[e.pubkey],"kinds":[0]};
-    var sentobj=["REQ", ws.uuid, filter];
-    var sentstr = JSON.stringify(sentobj);
+    let filter ={"authors":[e.pubkey],"kinds":[0]};
+    let sentobj=["REQ", ws.uuid, filter];
+    let sentstr = JSON.stringify(sentobj);
     ws0.prof_search_state = "requesting";
     ws.send(sentstr); /* websocket */
     print("profile: opened: "+relaylist[ws0.r]+"\n");
   };
 }
-var update_pvprof = function(name, dname, pic){
+const update_pvprof = function(name, dname, pic){
   if(pic!=""){
     imgicon.setAttribute("src", pic);
     imgicon.style.display = "inline";
@@ -598,7 +598,7 @@ var update_pvprof = function(name, dname, pic){
   if(dname != "") pvdname.innerHTML = escape_html(dname);
   
 }
-var escape_html = function(s){
+const escape_html = function(s){
   if(typeof s !== 'string') {
     return s;
   }
