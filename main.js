@@ -1,4 +1,4 @@
-const version = "1.37";
+const version = "1.38";
 const debug_extension_emulated=false;
 if(debug_extension_emulated){
   window.nostr = function(){};
@@ -270,19 +270,29 @@ const startcheckrelays=function(){
     }
     ws[r].onmessage = function(m){
       let r=this.r;
-      print("recv: "+relaylist[this.r]+"\n");
       //print("received message from ws["+relaylist[r]+"]='"+m.data+"'\n");
       let e=JSON.parse(m.data);
       ws[r].recv.push(e);
-      if(e[0]=='EVENT')pvevent(e[2], ws[r]);
-      if(e[0]=='EOSE')print("eose: "+relaylist[r]+"\n");
-      ws[r].close();
-      ws[r].status = "received";
-      drawresult(r);
+      let isfinished = false;
+      if(e[0]=='EVENT'){
+        print("event: "+relaylist[r]+"\n");
+        pvevent(e[2], ws[r]);
+        isfinished = true;
+      }else if(e[0]=='EOSE'){
+        print("eose : "+relaylist[r]+"\n");
+        isfinished = true;
+      }else{
+        print(e[0]+" : "+relaylist[r]+"\n");
+      }
+      if(isfinished){
+        ws[r].status = "received";
+        ws[r].close();
+        drawresult(r);
+      }
     };
     ws[r].onopen = function(e){
       let r = this.r;
-      print("open: "+relaylist[this.r]+"\n");
+      print("open : "+relaylist[this.r]+"\n");
       //print("ws["+relaylist[r]+"] was opened.\n");
       //making notehex
       if(form0.eid.value.substr(0, 6) == "nostr:"){
@@ -390,6 +400,8 @@ const preparetable = function(){
 const drawresult = function(r){
   let td1 = ws[r].td;
   let recv = ws[r].recv;
+  let last = recv.length-1;
+  print("status = "+ws[r].status+" : "+relaylist[r]+"\n");
   switch(ws[r].status){
     case "idle":
       td1.innerHTML = "can't open";
@@ -405,13 +417,13 @@ const drawresult = function(r){
       break;
     case "received":
     default:
-      if(recv instanceof Array && recv[0] instanceof Array){
+      if(recv instanceof Array && recv[last] instanceof Array){
         if(
-          recv[0][0]=="EVENT" && 
-          recv[0][2][filter[1]] !==undefined &&
-          recv[0][2][filter[1]]==notehex &&
-          recv[0][2].kind !==undefined &&
-          recv[0][2].kind==parseInt(form0.kind.value)){
+          recv[last][0]=="EVENT" && 
+          recv[last][2][filter[1]] !==undefined &&
+          recv[last][2][filter[1]]==notehex &&
+          recv[last][2].kind !==undefined &&
+          recv[last][2].kind==parseInt(form0.kind.value)){
           td1.innerHTML = "exist";
           td1.setAttribute("class","tdexist");
         }else{
