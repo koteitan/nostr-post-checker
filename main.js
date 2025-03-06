@@ -1,4 +1,4 @@
-const version = "1.38";
+const version = "1.39";
 const debug_extension_emulated=false;
 if(debug_extension_emulated){
   window.nostr = function(){};
@@ -469,14 +469,18 @@ put_my_relays = async function(kind){
     }
 }
 async function get_my_relays(kind){
-  let bsrelay;
-  if(window.nostr !== undefined){
-    bsrelay = await window.nostr.getRelays();
-  }else{
-    throw "Please set NIP-07 browser extension."
+  let bsrelay = defaultset.relaylist; // Use default relay list
+  let publicKey;
+  if(window.alby !== undefined) {
+    publicKey = await window.alby.nostr.getPublicKey();
+  } else if(window.nostr !== undefined){
+    publicKey = await window.nostr.getPublicKey();
+  } else {
+    throw "Please set NIP-07 browser extension or Alby extension.";
   }
-  let relaylist = Object.keys(bsrelay);
-  let filter = [{"kinds":[kind],"authors":[await window.nostr.getPublicKey()]}];
+
+  let relaylist = bsrelay;
+  let filter = [{"kinds":[kind],"authors":[publicKey]}];
   let resultlist = await Promise.allSettled(relaylist.map(async (url)=>{
     let result = [];
 
@@ -520,7 +524,7 @@ async function get_my_relays(kind){
       sub.on("eose",()=>{
         console.log("found:"+url);
         resolve(result);
-      });
+        });
     });
   })).then(results=>{
     console.log("debug:-------");
