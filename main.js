@@ -1,4 +1,4 @@
-const version = "1.39";
+const version = "1.40";
 const debug_extension_emulated=false;
 if(debug_extension_emulated){
   window.nostr = function(){};
@@ -95,6 +95,25 @@ const handle_search_button=function(){
   str="?"+str.split("?")[1];
   localStorage.setItem("settings", str);
   startcheckrelays();
+  
+  // Only scroll to result for portrait mode smartphones
+  if (window.innerHeight > window.innerWidth) {
+    const resultElement = document.getElementById("time");
+    if (resultElement) {
+      // Fast enough but still noticeable scroll speed
+      resultElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      
+      // Temporarily apply custom styles to control scroll speed
+      document.documentElement.style.scrollBehavior = 'smooth';
+      document.documentElement.style.scrollDuration = '200ms';
+      
+      // Reset styles after scrolling
+      setTimeout(function() {
+        document.documentElement.style.scrollBehavior = '';
+        document.documentElement.style.scrollDuration = '';
+      }, 300);
+    }
+  }
 }
 /* return browser address */
 const getaddr=function(){
