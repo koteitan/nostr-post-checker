@@ -1,180 +1,248 @@
+:root {
+  --primary-color: #6c5ce7;
+  --secondary-color: #a29bfe;
+  --background-color: #f8f9fa;
+  --text-color: #333333;
+  --border-color: #dfe6e9;
+  --success-color: #00b894;
+  --error-color: #d63031;
+  --hover-color: #5541d7;
+  --card-bg: #ffffff;
+  --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
 body {
-    font-family: 
-    -apple-system, BlinkMacSystemFont, Helvetica Neue, Segoe UI, Hiragino Kaku Gothic ProN, Hiragino Sans, ヒラギノ角ゴ ProN W3, Arial, メイリオ, Meiryo, sans-serif;
-    background-color: #DDDDDD;
+  font-family: -apple-system, BlinkMacSystemFont, Helvetica Neue, Segoe UI, Hiragino Kaku Gothic ProN, Hiragino Sans, ヒラギノ角ゴ ProN W3, Arial, メイリオ, Meiryo, sans-serif;
+  background-color: var(--background-color);
 }
 
 a {
-    color: black;
-    text-decoration: underline;
+  color: black;
+  text-decoration: underline;
 }
 
 a:link {
-    color: #000055;
+  color: var(--primary-color);
 }
 
 a:visited {
-    color: #0000CC;
+  color: var(--secondary-color);
 }
 
 a:hover {
-    color: #8888CC;
+  color: var(--hover-color);
 }
 
 address {
-    text-align: right;
-    font-style: normal;
-    font-size: 0.9rem; /* increased font size for better readability */
+  text-align: right;
+  font-style: normal;
+  font-size: 0.9rem;
 }
 
 .myinput {
-    border-style: solid;
-    border-color: black;
-    border-width: 1px;
-    color: black;
-    font-size: 12pt; /* increased font size for better readability */
-    padding: 2px;
-    white-space: nowrap;
+  border-style: solid;
+  border-color: black;
+  border-width: 1px;
+  color: black;
+  font-size: 12pt;
+  padding: 2px;
+  white-space: nowrap;
 }
 
 .example {
-    border-style: none;
-    border-color: black;
-    border-width: 1px;
-    color: black;
-    font-size: 12pt; /* increased font size for better readability */
-    padding: 10px;
-}
-
-.tdcon,
-.tdrelay,
-.tderror,
-.tdexist,
-.tdnotexist {
-    border-width: 0.01rem;
-    border-style: solid;
-    height: 1.8rem;
-    padding: 0 0.3rem;
-    vertical-align: middle;
+  border-style: none;
+  border-color: black;
+  border-width: 1px;
+  color: black;
+  font-size: 12pt;
+  padding: 10px;
 }
 
 .tdcon,
 .tderror,
 .tdexist,
 .tdnotexist {
-    text-align: right;
-    width: 7rem;
-}
-.tdcon {
-    background-color: #ffffff;
+  border-width: 0.01rem;
+  border-style: solid;
+  height: 1.8rem;
+  padding: 0 0.3rem;
+  vertical-align: middle;
+  border-radius: 4px;
+  border-color: black;
 }
 
 .tdrelay {
-    background-color: #cccccc;
+  border-width: 0.01rem;
+  border-style: solid;
+  height: 1.8rem;
+  padding: 0 0.3rem;
+  vertical-align: middle;
+  border-radius: 4px;
+  border-color: var(--border-color);
+}
+
+.tdcon,
+.tderror,
+.tdexist,
+.tdnotexist {
+  text-align: right;
+  width: 7rem;
+}
+
+.tdcon {
+  background-color: var(--card-bg);
+}
+
+.tdrelay {
+  background-color: #f1f2f6;
 }
 
 .tderror {
-    background-color: rgb(160, 160, 160);
-    min-width: 100px;
+  background-color: rgb(160, 160, 160);
+  min-width: 100px;
 }
 
 .tdexist {
-    background-color: rgb(120, 255, 120);
+  background-color: rgb(120, 255, 120);
 }
 
 .tdnotexist {
-    background-color: rgb(255, 120, 120);
+  background-color: rgb(255, 120, 120);
 }
 
 .tdbutton {
-    border-width: 1px;
-    border-style: solid;
-    height: 30px;
-    width: 100%; /* changed to percentage */
+  border-width: 1px;
+  border-style: solid;
+  height: 30px;
+  width: 100%;
 }
+
 .divpvnote {
-    overflow-y:scroll;
-    border-width: 0.01rem;
-    border-style: solid;
-    max-height: 7.2rem;
-    padding: 0 0.3rem;
-    margin: 2px;
+  overflow-y: scroll;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  max-height: 7.2rem;
+  padding: 0.3rem 0.5rem;
+  margin: 2px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
+
 .imgicon {
-    width :48px;
-    height:48px;
-    border-radius:100%;
-    margin-right:6px;
+  width: 48px;
+  height: 48px;
+  border-radius: 100%;
+  margin-right: 6px;
 }
+
 .tarelay {
-    margin: 2px;
+  margin: 2px;
 }
 
 hr {
-    border-style: solid;
+  border-style: solid;
 }
 
 .console {
-    font-family: MS Gothic;
-    background-color: black;
+  font-family: MS Gothic;
+  background-color: black;
 }
 
 h1 {
-    margin-bottom: 2rem;
+  margin-bottom: 2rem;
+  color: var(--primary-color);
 }
 
 dl {
-    margin-bottom: 1.5rem;
+  margin-bottom: 1.5rem;
 }
 
 ul {
-    margin-top: -0.8rem;
-    margin-bottom: 0.5rem;
+  margin-top: -0.8rem;
+  margin-bottom: 0.5rem;
 }
 
 dt {
-    font-weight: bold;
-    font-size: 14pt; /* increased font size for better readability */
+  font-weight: bold;
+  font-size: 14pt;
 }
 
 li,
 dd {
-    font-size: 0.9rem; /* increased font size for better readability */
-    padding: 0.05rem 0;
+  font-size: 0.9rem;
+  padding: 0.05rem 0;
 }
+
 .checkbox {
-    accent-color: #888888
+  accent-color: var(--primary-color);
 }
+
 .noborder {
-    border-style: none;
+  border-style: none;
 }
 
 .vcenter {
-    vertical-align: center;
+  vertical-align: center;
 }
 
 .mybutton {
-    width: 100%; /* changed to percentage */
+  width: 100%;
 }
 
 .fullwidth {
-    width: 95%;
-}
-textarea, 
-input {
-    font-size: 1rem;
+  width: 95%;
 }
 
-button{
-    font-size: 1rem;
+textarea,
+input {
+  font-size: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 4px 8px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+textarea:focus,
+input:focus {
+  border-color: var(--primary-color);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(108, 92, 231, 0.15);
+}
+
+button {
+  font-size: 1rem;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: var(--hover-color);
+}
+
+input[type="button"] {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+input[type="button"]:hover {
+  background-color: var(--hover-color);
 }
 
 .debugout {
-  display:none
+  display: none;
 }
-.langja{
-  display:display
+
+.langja {
+  display: display;
 }
-.langen{
-  display:none
+
+.langen {
+  display: none;
 }
