@@ -1,4 +1,4 @@
-const version = "1.41";
+const version = "1.42";
 const debug_extension_emulated=false;
 if(debug_extension_emulated){
   window.nostr = function(){};
@@ -6,6 +6,17 @@ if(debug_extension_emulated){
   window.nostr.getPublicKey = function(){return defaultset.mypubkey;};
   window.NostrTools = function(){};
 }
+
+// Utility function to parse kind input string into array of numbers
+const parseKinds = function(kindStr) {
+  if (!kindStr.trim()) return [];
+  // Split by comma or space and filter out empty strings
+  return kindStr.split(/[,\s]+/)
+    .filter(k => k.trim() !== '')
+    .map(k => parseInt(k.trim()))
+    .filter(k => !isNaN(k));
+};
+
 const defaultset=function(){};
 defaultset.mypubkey="4c5d5379a066339c88f6e101e3edb1fbaee4ede3eea35ffc6f1c664b3a4383ee";
 defaultset.eid="note15zl6ruufd5hcj0xmhq9r8yczjy2xt278qzn97e9zuc3dg36lkufq4326xp";
@@ -348,8 +359,9 @@ const startcheckrelays=function(){
 
       let eventFilter = {[filter[0]]:[notehex]};
       // Add kinds filter only if kind field is not empty
-      if (form0.kind.value.trim() !== "") {
-        eventFilter.kinds = [parseInt(form0.kind.value)];
+      const kinds = parseKinds(form0.kind.value);
+      if (kinds.length > 0) {
+        eventFilter.kinds = kinds;
       }
 
       let sendobj=[
@@ -446,7 +458,7 @@ const drawresult = function(r){
           recv[last][2][filter[1]] !==undefined &&
           recv[last][2][filter[1]]==notehex &&
           (form0.kind.value.trim() === "" || // kind filter is not applied
-           (recv[last][2].kind !==undefined && recv[last][2].kind==parseInt(form0.kind.value)))){
+           (recv[last][2].kind !==undefined && parseKinds(form0.kind.value).includes(recv[last][2].kind)))){
           td1.innerHTML = "exist";
           td1.setAttribute("class","tdexist");
         }else{
