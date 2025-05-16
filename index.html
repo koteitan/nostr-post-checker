@@ -15,7 +15,7 @@
       <span class="langen">You can check which relay servers the event exists on and which do not.</span>
       <table style="width:100%">
         <tr>
-          <td style="width:8em">
+          <td style="width:6em">
             <input type="checkbox" id="eidcheck" name="eidcheck" checked>
             <label for="eid">event id:</label>
           </td>
@@ -23,10 +23,24 @@
         </tr>
         <tr>
           <td>
-            <input type="checkbox" id="kindcheck" name="kindcheck" checked>
+            <input type="checkbox" id="kindcheck" name="kindcheck">
             <label for="kind">kinds:</label>
           </td>
           <td><input id="kind" name="kind" type="text" style="width:100%" value="1"/></td>
+        </tr>
+        <tr>
+          <td>
+            <input type="checkbox" id="sincecheck" name="sincecheck">
+            <label for="since">since:</label>
+          </td>
+          <td><input id="since" name="since" type="text" style="width:100%" placeholder="UNIX timestamp or YYYY/MM/DD HH:MM:SS [±HH:MM or JST/UTC]"/></td>
+        </tr>
+        <tr>
+          <td>
+            <input type="checkbox" id="untilcheck" name="untilcheck">
+            <label for="until">until:</label>
+          </td>
+          <td><input id="until" name="until" type="text" style="width:100%" placeholder="UNIX timestamp or YYYY/MM/DD HH:MM:SS [±HH:MM or JST/UTC]"/></td>
         </tr>
         <tr>
           <td><label for="relayliststr">relays:</label></td>

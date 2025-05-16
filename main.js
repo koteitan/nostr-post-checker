@@ -1,11 +1,69 @@
-const version = "1.45";
-const debug_extension_emulated=false;
+const version = "1.48";
+const debug_extension_emulated = false; // true: emulate nostr extension
 if(debug_extension_emulated){
   window.nostr = function(){};
   window.nostr.getRelays    = function(){return debug_relaylist;};
   window.nostr.getPublicKey = function(){return defaultset.mypubkey;};
   window.NostrTools = function(){};
 }
+
+// Timezone abbreviation to offset mapping
+const timezoneMap = {
+  'JST': '+0900',
+  'UTC': '+0000',
+  'GMT': '+0000',
+  'EDT': '-0400',
+  'EST': '-0500',
+  'PDT': '-0700',
+  'PST': '-0800',
+};
+
+// Function to parse timestamp input (Unix timestamp or date string with optional timezone)
+const parseTimestamp = function(input) {
+  if (!input || input.trim() === '') return null;
+  
+  const inputStr = input.trim();
+
+  // If the input is a pure number and long enough to be a unix timestamp
+  if (inputStr.match(/^\d+$/) && inputStr.length >= 9) {
+    return parseInt(inputStr);
+  }
+  
+  // Try parsing as YYYY-MM-DD or YYYY/MM/DD with optional HH:MM:SS [TIMEZONE]
+  const matchWithTz = inputStr.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})(?:\s+(\d{2}):(\d{2}):(\d{2}))?(?:\s*((?:[+-]\d{2}:?\d{2})|(?:[A-Z]{3,4})))?$/);
+  if (matchWithTz) {
+    const [_, year, month, day, hour = '00', minute = '00', second = '00', timezone] = matchWithTz;
+    let date;
+    
+    if (timezone) {
+      let offset;
+      if (timezone.match(/^[+-]/)) {
+        // If timezone is in ±HH:MM format
+        offset = timezone.replace(':', '');
+      } else {
+        // If timezone is abbreviated (JST, UTC, etc.)
+        offset = timezoneMap[timezone];
+        if (!offset) {
+          // If unknown timezone, use local timezone
+          date = new Date(year, month - 1, day, hour, minute, second);
+          return Math.floor(date.getTime() / 1000);
+        }
+      }
+      // Ensure month and day are padded to 2 digits for ISO format
+      const paddedMonth = month.toString().padStart(2, '0');
+      const paddedDay = day.toString().padStart(2, '0');
+      const dateStr = `${year}-${paddedMonth}-${paddedDay}T${hour}:${minute}:${second}${offset}`;
+      date = new Date(dateStr);
+    } else {
+      // If no timezone, use local timezone
+      date = new Date(year, month - 1, day, hour, minute, second);
+    }
+    
+    return Math.floor(date.getTime() / 1000);
+  }
+  
+  return null; // Return null if parsing fails
+};
 
 // Utility function to parse kind input string into array of numbers
 const parseKinds = function(kindStr) {
@@ -15,6 +73,26 @@ const parseKinds = function(kindStr) {
     .filter(k => k.trim() !== '')
     .map(k => parseInt(k.trim()))
     .filter(k => !isNaN(k));
+};
+
+// Parse date string or timestamp to unix timestamp
+const parseDate = function(dateStr) {
+  if (!dateStr || dateStr.trim() === '') return null;
+  
+  // If it's already a unix timestamp
+  if (!isNaN(dateStr) && dateStr.length >= 9) {
+    return parseInt(dateStr);
+  }
+  
+  // Try parsing as ISO date
+  try {
+    const date = new Date(dateStr);
+    if (!isNaN(date.getTime())) {
+      return Math.floor(date.getTime() / 1000);
+    }
+  } catch (e) {}
+  
+  return null;
 };
 
 const defaultset=function(){};
@@ -169,11 +247,25 @@ const urlsp2form=function(urlsp){
     form0.relayliststr.value = urlsp.get('relay').replace(/;/g,"\n");
     isset = true;
   }
+  if(urlsp.has('since')){
+    form0.since.value = urlsp.get('since');
+    isset = true;
+  }
+  if(urlsp.has('until')){
+    form0.until.value = urlsp.get('until');
+    isset = true;
+  }
   if(urlsp.has('disableid')){
     form0.eidcheck.checked = false;
   }
   if(urlsp.has('disablekind')){
     form0.kindcheck.checked = false;
+  }
+  if(urlsp.has('disablesince')){
+    form0.sincecheck.checked = false;
+  }
+  if(urlsp.has('disableuntil')){
+    form0.untilcheck.checked = false;
   }
   return isset;
 }
@@ -183,11 +275,15 @@ const form2url=function(){
   if(!form1.pvcheck  .checked) query += "&hidepv";
   if( form0.eid .value!=""   ) query += "&eid="  + form0.eid .value;
   if( form0.kind.value!=""   ) query += "&kind=" + form0.kind.value;
+  if( form0.since.value!=""  ) query += "&since=" + form0.since.value;
+  if( form0.until.value!=""  ) query += "&until=" + form0.until.value;
   if( form0.relayliststr.value!=""){
     query += "&relay=" + form0.relayliststr.value.replace(/\n/g,';');
   }
   if(!form0.eidcheck.checked) query += "&disableid";
   if(!form0.kindcheck.checked) query += "&disablekind";
+  if(!form0.sincecheck.checked) query += "&disablesince";
+  if(!form0.untilcheck.checked) query += "&disableuntil";
   const url = location.origin+location.pathname+"?"+query.slice(1);
   return url;
 }
@@ -382,6 +478,20 @@ const startcheckrelays=function(){
         const kinds = parseKinds(form0.kind.value);
         if (kinds.length > 0) {
           eventFilter.kinds = kinds;
+        }
+      }
+      // Add since filter if checked and valid
+      if (form0.sincecheck.checked) {
+        const since = parseTimestamp(form0.since.value);
+        if (since !== null) {
+          eventFilter.since = since;
+        }
+      }
+      // Add until filter if checked and valid
+      if (form0.untilcheck.checked) {
+        const until = parseTimestamp(form0.until.value);
+        if (until !== null) {
+          eventFilter.until = until;
         }
       }
 
