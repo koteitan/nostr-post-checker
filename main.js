@@ -1,4 +1,4 @@
-const version = "1.44";
+const version = "1.45";
 const debug_extension_emulated=false;
 if(debug_extension_emulated){
   window.nostr = function(){};
@@ -169,6 +169,12 @@ const urlsp2form=function(urlsp){
     form0.relayliststr.value = urlsp.get('relay').replace(/;/g,"\n");
     isset = true;
   }
+  if(urlsp.has('disableid')){
+    form0.eidcheck.checked = false;
+  }
+  if(urlsp.has('disablekind')){
+    form0.kindcheck.checked = false;
+  }
   return isset;
 }
 const form2url=function(){
@@ -180,6 +186,8 @@ const form2url=function(){
   if( form0.relayliststr.value!=""){
     query += "&relay=" + form0.relayliststr.value.replace(/\n/g,';');
   }
+  if(!form0.eidcheck.checked) query += "&disableid";
+  if(!form0.kindcheck.checked) query += "&disablekind";
   const url = location.origin+location.pathname+"?"+query.slice(1);
   return url;
 }
@@ -365,14 +373,16 @@ const startcheckrelays=function(){
       }
 
       let eventFilter = {};
-      // Add id/author filter only if event id is not empty
-      if (filter[0] !== "" && notehex !== "") {
+      // Add id/author filter only if event id is checked and not empty
+      if (form0.eidcheck.checked && filter[0] !== "" && notehex !== "") {
         eventFilter[filter[0]] = [notehex];
       }
-      // Add kinds filter only if kind field is not empty
-      const kinds = parseKinds(form0.kind.value);
-      if (kinds.length > 0) {
-        eventFilter.kinds = kinds;
+      // Add kinds filter only if kind is checked and not empty
+      if (form0.kindcheck.checked) {
+        const kinds = parseKinds(form0.kind.value);
+        if (kinds.length > 0) {
+          eventFilter.kinds = kinds;
+        }
       }
 
       let sendobj=[
@@ -466,11 +476,11 @@ const drawresult = function(r){
       if(recv instanceof Array && recv[last] instanceof Array){
         if(
           recv[last][0]=="EVENT" && 
-          // event id filter only if not empty
-          (filter[0] === "" || notehex === "" || 
+          // event id filter only if checked and not empty
+          (!form0.eidcheck.checked || filter[0] === "" || notehex === "" || 
            (recv[last][2][filter[1]] !==undefined && recv[last][2][filter[1]]==notehex)) &&
-          // kind filter only if not empty
-          (form0.kind.value.trim() === "" || 
+          // kind filter only if checked and not empty
+          (!form0.kindcheck.checked || form0.kind.value.trim() === "" || 
            (recv[last][2].kind !==undefined && parseKinds(form0.kind.value).includes(recv[last][2].kind)))){
           td1.innerHTML = "exist";
           td1.setAttribute("class","tdexist");
@@ -622,8 +632,11 @@ const search_prof = function(e, ws0){
         let dname = "";
         let pic   = "";
         if(content.name         !== undefined) name  = content.name;
+        else name = "";
         if(content.display_name !== undefined) dname = content.display_name;
+        else dname = "";
         if(content.picture      !== undefined) pic   = content.picture;
+        else pic = "";
         update_pvprof(name, dname, pic);
         ws0.prof_search_state = "found";
         reqclose = true;
