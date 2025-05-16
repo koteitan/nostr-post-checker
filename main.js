@@ -1,4 +1,4 @@
-const version = "1.42";
+const version = "1.44";
 const debug_extension_emulated=false;
 if(debug_extension_emulated){
   window.nostr = function(){};
@@ -246,14 +246,21 @@ const startcheckrelays=function(){
   /* check id */
   iserror = false;
   let n;
-  if(form0.eid.value.substr(0, 6) == "nostr:"){
+  let ishex = false;
+  
+  // Empty event id case
+  if(form0.eid.value.trim() === "") {
+    filter = ["", ""];  // Empty filter will not be applied
+    notehex = "";
+    ishex = false;
+  } else if(form0.eid.value.substr(0, 6) == "nostr:"){
     n = 6;
   }else{
     n = 0;
   }
-  let ishex=false;
-  if(form0.eid.value.substr(n, 4) == "note" 
-  || form0.eid.value.substr(n, 6) == "nevent"){
+  if(form0.eid.value.trim() !== "" && (
+     form0.eid.value.substr(n, 4) == "note" 
+     || form0.eid.value.substr(n, 6) == "nevent")){
     filter=["ids","id"];
   }else if(form0.eid.value.substr(n, 4) == "npub"
         || form0.eid.value.substr(n, 8) == "nprofile"){
@@ -357,7 +364,11 @@ const startcheckrelays=function(){
         }
       }
 
-      let eventFilter = {[filter[0]]:[notehex]};
+      let eventFilter = {};
+      // Add id/author filter only if event id is not empty
+      if (filter[0] !== "" && notehex !== "") {
+        eventFilter[filter[0]] = [notehex];
+      }
       // Add kinds filter only if kind field is not empty
       const kinds = parseKinds(form0.kind.value);
       if (kinds.length > 0) {
@@ -455,9 +466,11 @@ const drawresult = function(r){
       if(recv instanceof Array && recv[last] instanceof Array){
         if(
           recv[last][0]=="EVENT" && 
-          recv[last][2][filter[1]] !==undefined &&
-          recv[last][2][filter[1]]==notehex &&
-          (form0.kind.value.trim() === "" || // kind filter is not applied
+          // event id filter only if not empty
+          (filter[0] === "" || notehex === "" || 
+           (recv[last][2][filter[1]] !==undefined && recv[last][2][filter[1]]==notehex)) &&
+          // kind filter only if not empty
+          (form0.kind.value.trim() === "" || 
            (recv[last][2].kind !==undefined && parseKinds(form0.kind.value).includes(recv[last][2].kind)))){
           td1.innerHTML = "exist";
           td1.setAttribute("class","tdexist");
