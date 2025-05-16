@@ -1,4 +1,4 @@
-const version = "1.48";
+const version = "1.49";
 const debug_extension_emulated = false; // true: emulate nostr extension
 if(debug_extension_emulated){
   window.nostr = function(){};
@@ -6,17 +6,6 @@ if(debug_extension_emulated){
   window.nostr.getPublicKey = function(){return defaultset.mypubkey;};
   window.NostrTools = function(){};
 }
-
-// Timezone abbreviation to offset mapping
-const timezoneMap = {
-  'JST': '+0900',
-  'UTC': '+0000',
-  'GMT': '+0000',
-  'EDT': '-0400',
-  'EST': '-0500',
-  'PDT': '-0700',
-  'PST': '-0800',
-};
 
 // Function to parse timestamp input (Unix timestamp or date string with optional timezone)
 const parseTimestamp = function(input) {
@@ -800,3 +789,50 @@ const escape_html = function(s){
     }[match]
   });
 }
+
+// Timezone abbreviation to offset mapping
+const timezoneMap = {
+  // Asia
+  'JST': '+0900', // Japan Standard Time
+  'KST': '+0900', // Korea Standard Time
+  'CST': '+0800', // China Standard Time
+  'HKT': '+0800', // Hong Kong Time
+  'SGT': '+0800', // Singapore Time
+  'IST': '+0530', // India Standard Time
+  'PHT': '+0800', // Philippine Time
+  'WIB': '+0700', // Western Indonesian Time
+  'THA': '+0700', // Thailand Standard Time
+  
+  // Australia & Pacific
+  'AEST': '+1000', // Australian Eastern Standard Time
+  'ACST': '+0930', // Australian Central Standard Time
+  'AWST': '+0800', // Australian Western Standard Time
+  'NZST': '+1200', // New Zealand Standard Time
+  'NZDT': '+1300', // New Zealand Daylight Time
+  
+  // Europe & Africa
+  'GMT': '+0000', // Greenwich Mean Time
+  'UTC': '+0000', // Coordinated Universal Time
+  'BST': '+0100', // British Summer Time
+  'CET': '+0100', // Central European Time
+  'CEST': '+0200', // Central European Summer Time
+  'EET': '+0200', // Eastern European Time
+  'EEST': '+0300', // Eastern European Summer Time
+  'MSK': '+0300', // Moscow Time
+  'SAST': '+0200', // South African Standard Time
+  
+  // Americas
+  'EST': '-0500', // Eastern Standard Time
+  'EDT': '-0400', // Eastern Daylight Time
+  'CST': '-0600', // Central Standard Time (North America)
+  'CDT': '-0500', // Central Daylight Time
+  'MST': '-0700', // Mountain Standard Time
+  'MDT': '-0600', // Mountain Daylight Time
+  'PST': '-0800', // Pacific Standard Time
+  'PDT': '-0700', // Pacific Daylight Time
+  'AKST': '-0900', // Alaska Standard Time
+  'AKDT': '-0800', // Alaska Daylight Time
+  'HST': '-1000', // Hawaii Standard Time
+  'BRT': '-0300', // Brasilia Time
+  'ART': '-0300', // Argentina Time
+};
