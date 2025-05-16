@@ -1,4 +1,4 @@
-const version = "1.40";
+const version = "1.41";
 const debug_extension_emulated=false;
 if(debug_extension_emulated){
   window.nostr = function(){};
@@ -346,7 +346,11 @@ const startcheckrelays=function(){
         }
       }
 
-      let eventFilter = {[filter[0]]:[notehex],"kinds":[parseInt(form0.kind.value)]};
+      let eventFilter = {[filter[0]]:[notehex]};
+      // Add kinds filter only if kind field is not empty
+      if (form0.kind.value.trim() !== "") {
+        eventFilter.kinds = [parseInt(form0.kind.value)];
+      }
 
       let sendobj=[
         "REQ",
@@ -441,8 +445,8 @@ const drawresult = function(r){
           recv[last][0]=="EVENT" && 
           recv[last][2][filter[1]] !==undefined &&
           recv[last][2][filter[1]]==notehex &&
-          recv[last][2].kind !==undefined &&
-          recv[last][2].kind==parseInt(form0.kind.value)){
+          (form0.kind.value.trim() === "" || // kind filter is not applied
+           (recv[last][2].kind !==undefined && recv[last][2].kind==parseInt(form0.kind.value)))){
           td1.innerHTML = "exist";
           td1.setAttribute("class","tdexist");
         }else{
