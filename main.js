@@ -1,4 +1,4 @@
-const version = "1.50";
+const version = "1.51";
 const debug_extension_emulated = false; // true: emulate nostr extension
 if(debug_extension_emulated){
   window.nostr = function(){};
@@ -101,6 +101,13 @@ defaultset.relaylist=[// cf. https://docs.google.com/spreadsheets/d/16PPbdUiGhcg
   "wss://relay-jp.nostr.wirednet.jp",
   "wss://nostr-relay.nokotaro.com",
   "wss://nostr.holybea.com",
+];
+// bootstrap relays for relay list (kind:10002/3) discovery
+defaultset.bootstraprelaylist=[
+  "wss://directory.yabu.me",
+  "wss://purplepag.es",
+  "wss://user.kindpag.es",
+  "wss://indexer.coracle.social",
 ];
 const debug_relaylist={
   "wss://yabu.me"                :{read:true, write:true},
@@ -742,7 +749,7 @@ put_my_relays = async function(kind){
     }
 }
 async function get_my_relays(kind){
-  let bsrelay = defaultset.relaylist; // Use default relay list
+  let bsrelay = defaultset.bootstraprelaylist; // Use bootstrap relay list
   let publicKey;
   if(window.alby !== undefined) {
     publicKey = await window.alby.nostr.getPublicKey();
