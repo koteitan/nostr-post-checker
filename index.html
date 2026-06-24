@@ -9,6 +9,28 @@
     <script src="https://cdn.jsdelivr.net/npm/@nikolat/makibishi@0.1.6"></script>
   </head>
   <body>
+    <script>
+      // apply dark mode as early as possible to avoid a flash (default: dark)
+      (function(){
+        var dm = localStorage.getItem("darkmode");
+        if(dm === null || dm === "true"){ document.body.classList.add("dark"); }
+      })();
+    </script>
+    <div id="menu" class="menu">
+      <button id="menubtn" class="menubtn" type="button" onclick="toggleMenu();" aria-label="menu">&#9776;</button>
+      <div id="menupanel" class="menupanel" style="display:none">
+        <div class="menuaccount" id="menuaccount" onclick="login_nip07();" title="NIP-07">
+          <img id="accicon" class="accicon" style="display:none" alt=""/>
+          <span id="accname" class="accname"></span>
+        </div>
+        <label class="menuitem"><input type="checkbox" class="checkbox" id="darkcheck" onclick="toggleDark();">dark mode</label>
+        <hr class="menusep">
+        <label class="menuitem"><input type="checkbox" class="checkbox" name="formcheck"  form="form1" onclick="showform();" checked>show form</label>
+        <label class="menuitem"><input type="checkbox" class="checkbox" name="pvcheck"    form="form1" onclick="showpv();"   checked>show pv</label>
+        <label class="menuitem"><input type="checkbox" class="checkbox" name="debugcheck" form="form1" onclick="showdebug();">show debug</label>
+        <button class="menureset" type="button" onclick="resetLocalStorage();">reset</button>
+      </div>
+    </div>
     <h1>nostr-post-checker<span class="makibishi" data-relays="wss://yabu.me,wss://relay.damus.io" data-url="https://koteitan.github.io/beta/nostr-post-checker/" data-content="🤙" data-allow-anonymous-reaction="true"></span></h1>
     <form name=form0 class="fullwidth inputform">
       <span class="langja">イベントがどのリレーに存在し、どのリレーに存在していないかを確認するサイトです。</span>
@@ -72,11 +94,8 @@
       </tr></table>
     </div>
     <table style="width:100%" id="result"></table>
-    <form name=form1>
+    <form name=form1 id="form1">
       <div>
-        <input type="checkbox" class="checkbox" name="formcheck"  onclick="showform();" checked>show form
-        <input type="checkbox" class="checkbox" name="pvcheck"    onclick="showpv();"   checked>show pv
-        <input type="checkbox" class="checkbox" name="debugcheck" onclick="showdebug();"       >show debug
         <button name="copy" type="button" onclick="javascript:handle_copy_button()  ;">copy URL</button>
         <br>
         <span class="debugout">debug:</span>

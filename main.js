@@ -1,4 +1,4 @@
-const version = "1.49";
+const version = "1.50";
 const debug_extension_emulated = false; // true: emulate nostr extension
 if(debug_extension_emulated){
   window.nostr = function(){};
@@ -163,6 +163,22 @@ window.onload=function(){
   }
   showform();
   showpv();
+
+  //dark mode (default: dark), stored in localStorage
+  const dm = localStorage.getItem("darkmode");
+  applyDark(dm === null ? true : (dm === "true"));
+
+  //NIP-07 account display
+  initAccount();
+
+  //close the menu when clicking outside of it
+  document.addEventListener("click", function(e){
+    const menu  = document.getElementById("menu");
+    const panel = document.getElementById("menupanel");
+    if(menu && panel && !menu.contains(e.target)){
+      panel.style.display = "none";
+    }
+  });
 }
 const handle_copy_button=function(){
   const url = form2url();
@@ -310,6 +326,106 @@ const showdebug = function(){
   }else{
     e.map(x=>{x.style.display='none';});
   }
+}
+
+/* ---- top-right pulldown menu ---- */
+const toggleMenu = function(){
+  const p = document.getElementById("menupanel");
+  p.style.display = (p.style.display === "none" || p.style.display === "") ? "block" : "none";
+}
+
+/* ---- dark mode ---- */
+const applyDark = function(isDark){
+  if(isDark){
+    document.body.classList.add("dark");
+  }else{
+    document.body.classList.remove("dark");
+  }
+  const cb = document.getElementById("darkcheck");
+  if(cb) cb.checked = isDark;
+}
+const toggleDark = function(){
+  const isDark = document.getElementById("darkcheck").checked;
+  localStorage.setItem("darkmode", isDark ? "true" : "false");
+  applyDark(isDark);
+}
+
+/* ---- reset localStorage ---- */
+const resetLocalStorage = function(){
+  const msg = (navigator.language=='ja') ? "localStorage をリセットしますか？" : "Reset localStorage?";
+  if(confirm(msg)){
+    localStorage.clear();
+    location.reload();
+  }
+}
+
+/* ---- NIP-07 account display ---- */
+const initAccount = function(){
+  const nameel = document.getElementById("accname");
+  const pubkey = localStorage.getItem("mypubkey");
+  if(pubkey){
+    fetch_my_profile(pubkey);
+  }else{
+    nameel.innerHTML = (navigator.language=='ja') ? "NIP-07でログイン" : "Login with NIP-07";
+  }
+}
+const login_nip07 = async function(){
+  const nameel = document.getElementById("accname");
+  try{
+    let pubkey;
+    if(window.nostr !== undefined && window.nostr.getPublicKey){
+      pubkey = await window.nostr.getPublicKey();
+    }else if(window.alby !== undefined){
+      pubkey = await window.alby.nostr.getPublicKey();
+    }else{
+      nameel.innerHTML = (navigator.language=='ja') ? "NIP-07拡張がありません" : "No NIP-07 extension";
+      return;
+    }
+    localStorage.setItem("mypubkey", pubkey);
+    nameel.innerHTML = (navigator.language=='ja') ? "読み込み中..." : "loading...";
+    fetch_my_profile(pubkey);
+  }catch(e){
+    print("nip07 login error: "+e+"\n");
+    nameel.innerHTML = (navigator.language=='ja') ? "ログイン失敗" : "login failed";
+  }
+}
+/* fetch kind:0 for the app user and show [picture][name] */
+let myproftime = 0;
+const fetch_my_profile = function(pubkey){
+  myproftime = 0;
+  for(const url of defaultset.relaylist){
+    let ws;
+    try{ ws = new WebSocket(url); }catch(e){ continue; }
+    ws.uuid = genuuid();
+    ws.onopen = function(){
+      let filter = {"authors":[pubkey],"kinds":[0],"limit":1};
+      this.send(JSON.stringify(["REQ", this.uuid, filter]));
+    };
+    ws.onmessage = function(m){
+      let recv = JSON.parse(m.data);
+      if(recv[0]=="EVENT" && recv[2].created_at > myproftime){
+        myproftime = recv[2].created_at;
+        try{
+          let content = JSON.parse(recv[2].content);
+          update_account(content.picture, content.display_name || content.name);
+        }catch(e){}
+      }else if(recv[0]=="EOSE"){
+        try{ this.send(JSON.stringify(["CLOSE", this.uuid])); this.close(); }catch(e){}
+      }
+    };
+    ws.onerror = function(){};
+  }
+}
+const update_account = function(pic, disp){
+  const icon   = document.getElementById("accicon");
+  const nameel = document.getElementById("accname");
+  if(pic){
+    icon.src = pic;
+    icon.style.display = "inline-block";
+  }else{
+    icon.style.display = "none";
+  }
+  nameel.innerHTML = disp ? escape_html(disp) : "(no name)";
 }
 const startcheckrelays=function(){
   /* clear websockets */
