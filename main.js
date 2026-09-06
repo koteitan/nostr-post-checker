@@ -1,4 +1,42 @@
 const version = "1.51";
+
+/* ---- localStorage namespace helpers ----
+   All persistent data of this app lives in a single key "nostr-post-checker:state"
+   because github.io shares one origin among all the sites.
+   Legacy keys ("settings"/"darkmode"/"mypubkey") are read as a fallback only and
+   are never removed. */
+const LS_NS  = "nostr-post-checker";
+const lsKey  = function(name){ return LS_NS + ":" + name; };
+const loadLegacyState = function(){
+  const st = {};
+  try{
+    const settings = localStorage.getItem("settings");
+    if(settings !== null) st.settings = settings;
+    const darkmode = localStorage.getItem("darkmode");
+    if(darkmode !== null) st.darkmode = (darkmode === "true");
+    const mypubkey = localStorage.getItem("mypubkey");
+    if(mypubkey !== null) st.mypubkey = mypubkey;
+  }catch(e){}
+  return st;
+};
+const loadState = function(){
+  try{
+    const raw = localStorage.getItem(lsKey("state"));
+    if(raw !== null){
+      const st = JSON.parse(raw);
+      if(st !== null && typeof st === "object") return st;
+    }
+  }catch(e){}
+  return loadLegacyState();
+};
+const saveState = function(state){
+  try{ localStorage.setItem(lsKey("state"), JSON.stringify(state)); }catch(e){}
+};
+const updateState = function(patch){
+  const st = loadState();
+  for(const k in patch) st[k] = patch[k];
+  saveState(st);
+};
 const debug_extension_emulated = false; // true: emulate nostr extension
 if(debug_extension_emulated){
   window.nostr = function(){};
@@ -155,7 +193,8 @@ window.onload=function(){
   form0.kind.value = 1;
 
   //try to get settings from localStorage
-  const r = localStorage.getItem("settings");
+  const lsstate = loadState();
+  const r = (lsstate.settings === undefined || lsstate.settings === null) ? null : lsstate.settings;
   if(r!==null){
     const urlsp = new URLSearchParams(r);
     urlsp2form(urlsp);
@@ -172,8 +211,8 @@ window.onload=function(){
   showpv();
 
   //dark mode (default: dark), stored in localStorage
-  const dm = localStorage.getItem("darkmode");
-  applyDark(dm === null ? true : (dm === "true"));
+  const dm = lsstate.darkmode;
+  applyDark((dm === undefined || dm === null) ? true : (dm === true || dm === "true"));
 
   //NIP-07 account display
   initAccount();
@@ -194,7 +233,7 @@ const handle_copy_button=function(){
 const handle_search_button=function(){
   let str=form2url();
   str="?"+str.split("?")[1];
-  localStorage.setItem("settings", str);
+  updateState({settings: str});
   startcheckrelays();
   
   // Only scroll to result for portrait mode smartphones
@@ -353,15 +392,30 @@ const applyDark = function(isDark){
 }
 const toggleDark = function(){
   const isDark = document.getElementById("darkcheck").checked;
-  localStorage.setItem("darkmode", isDark ? "true" : "false");
+  updateState({darkmode: isDark});
   applyDark(isDark);
 }
 
-/* ---- reset localStorage ---- */
+/* ---- reset localStorage ----
+   Only the keys of this app ("nostr-post-checker:*") are removed.
+   localStorage.clear() must not be used here: github.io is a single origin
+   shared with all the other sites, so clear() would wipe them out too. */
 const resetLocalStorage = function(){
   const msg = (navigator.language=='ja') ? "localStorage をリセットしますか？" : "Reset localStorage?";
   if(confirm(msg)){
-    localStorage.clear();
+    try{
+      const prefix = LS_NS + ":";
+      const keys = [];
+      for(let i=0;i<localStorage.length;i++){
+        const k = localStorage.key(i);
+        if(k !== null && k.indexOf(prefix) === 0) keys.push(k);
+      }
+      for(const k of keys) localStorage.removeItem(k);
+      /* Write an empty state so that loadState() does not fall back to the
+         pre-namespace keys (settings / darkmode / mypubkey), which are kept
+         on purpose and would otherwise make the reset a no-op. */
+      saveState({});
+    }catch(e){}
     location.reload();
   }
 }
@@ -369,7 +423,7 @@ const resetLocalStorage = function(){
 /* ---- NIP-07 account display ---- */
 const initAccount = function(){
   const nameel = document.getElementById("accname");
-  const pubkey = localStorage.getItem("mypubkey");
+  const pubkey = loadState().mypubkey;
   if(pubkey){
     fetch_my_profile(pubkey);
   }else{
@@ -388,7 +442,7 @@ const login_nip07 = async function(){
       nameel.innerHTML = (navigator.language=='ja') ? "NIP-07拡張がありません" : "No NIP-07 extension";
       return;
     }
-    localStorage.setItem("mypubkey", pubkey);
+    updateState({mypubkey: pubkey});
     nameel.innerHTML = (navigator.language=='ja') ? "読み込み中..." : "loading...";
     fetch_my_profile(pubkey);
   }catch(e){

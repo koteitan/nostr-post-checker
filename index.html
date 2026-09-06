@@ -11,9 +11,27 @@
   <body>
     <script>
       // apply dark mode as early as possible to avoid a flash (default: dark)
+      // state lives in "nostr-post-checker:state"; the legacy "darkmode" key is
+      // only read as a fallback and is never removed. keep this in sync with
+      // loadState() in main.js.
       (function(){
-        var dm = localStorage.getItem("darkmode");
-        if(dm === null || dm === "true"){ document.body.classList.add("dark"); }
+        var dark = true;
+        try{
+          var st  = null;
+          var raw = localStorage.getItem("nostr-post-checker:state");
+          if(raw !== null){
+            var o = JSON.parse(raw);
+            if(o !== null && typeof o === "object") st = o;
+          }
+          if(st === null){
+            var dm = localStorage.getItem("darkmode");
+            st = (dm === null) ? {} : {darkmode: (dm === "true")};
+          }
+          if(st.darkmode !== undefined && st.darkmode !== null){
+            dark = (st.darkmode === true || st.darkmode === "true");
+          }
+        }catch(e){}
+        if(dark){ document.body.classList.add("dark"); }
       })();
     </script>
     <div id="menu" class="menu">
