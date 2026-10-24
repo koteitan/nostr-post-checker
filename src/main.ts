@@ -416,7 +416,7 @@ let curIdField: "" | "id" | "pubkey" = "";
 let curNotehex = "";
 
 // ---- delete request (NIP-09 kind:5) ----
-// The buttons only *ask* relays to delete the event; each relay decides.
+// The buttons send a deletion request (NIP-09 kind:5) for the event.
 let delTargetId = ""; // event id the table is about; "" when requests are not possible
 let delTargetKind: number | undefined; // for the optional "k" tag
 const relayDelStatus = new Map<string, HTMLElement[]>(); // relayKey -> status spans

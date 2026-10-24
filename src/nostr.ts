@@ -280,8 +280,7 @@ export interface DeleteRequestHandlers {
 }
 
 // Send a NIP-09 deletion request (kind:5) for `eventId` to `relays`, signed by
-// the NIP-07 extension. It only asks the relays; each relay decides whether to
-// delete. `kind` adds the optional "k" tag when known.
+// the NIP-07 extension. `kind` adds the optional "k" tag when known.
 export function sendDeleteRequest(
   relays: string[],
   eventId: string,
