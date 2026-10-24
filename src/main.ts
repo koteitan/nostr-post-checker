@@ -12,7 +12,7 @@ import {
 } from "./nostr";
 import type { LazyFilter } from "rx-nostr";
 
-const version = "1.53";
+const version = "1.54";
 
 // ---- timeouts (ms) ----
 const CHECK_EOSE_TIMEOUT = 60000; // matches the original 60s overall timeout

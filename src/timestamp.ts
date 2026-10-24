@@ -49,7 +49,16 @@ export const timezoneMap: Record<string, string> = {
   ART: "-0300", // Argentina Time
 };
 
-// Parse timestamp input (Unix timestamp or date string with optional timezone)
+// True when the fields name a real calendar date and time of day.
+function isRealDateTime(y: number, mo: number, d: number, h: number, mi: number, s: number): boolean {
+  const leap = (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
+  const days = [31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][mo - 1];
+  return days !== undefined && d >= 1 && d <= days && h <= 23 && mi <= 59 && s <= 59;
+}
+
+// Parse timestamp input (Unix timestamp or date string with optional timezone).
+// Returns null when the input is not in an accepted format or names a date or
+// time that does not exist.
 export function parseTimestamp(input: string): number | null {
   if (!input || input.trim() === "") return null;
 
@@ -65,47 +74,36 @@ export function parseTimestamp(input: string): number | null {
     /^(\d{4})[-/](\d{1,2})[-/](\d{1,2})(?:\s+(\d{2}):(\d{2}):(\d{2}))?(?:\s*((?:[+-]\d{2}:?\d{2})|(?:[A-Z]{3,4})))?$/
   );
   if (matchWithTz) {
-    const [, year, month, day, hour = "00", minute = "00", second = "00", timezone] = matchWithTz;
-    let date: Date;
+    const [y, mo, d, h, mi, s] = matchWithTz.slice(1, 7).map((x) => Number(x ?? 0));
+    const timezone = matchWithTz[7];
 
+    // A date or time that does not exist is ignored, instead of letting Date roll
+    // it over (2024/02/30 -> 03/01) or produce NaN.
+    if (!isRealDateTime(y, mo, d, h, mi, s)) return null;
+
+    // offset of the given timezone in minutes; null means the local timezone
+    let offsetMin: number | null = null;
     if (timezone) {
-      let offset: string;
-      if (timezone.match(/^[+-]/)) {
-        // ±HH:MM format
-        offset = timezone.replace(":", "");
-      } else {
-        // Abbreviated (JST, UTC, ...)
-        offset = timezoneMap[timezone];
-        if (!offset) {
-          // Unknown timezone: use local timezone
-          date = new Date(
-            Number(year),
-            Number(month) - 1,
-            Number(day),
-            Number(hour),
-            Number(minute),
-            Number(second)
-          );
-          return Math.floor(date.getTime() / 1000);
-        }
+      const off = timezone.startsWith("+") || timezone.startsWith("-") ? timezone : timezoneMap[timezone];
+      // an unknown abbreviation falls back to the local timezone
+      if (off !== undefined) {
+        const m = off.match(/^([+-])(\d{2}):?(\d{2})$/);
+        if (!m || Number(m[2]) > 14 || Number(m[3]) > 59) return null;
+        offsetMin = (m[1] === "-" ? -1 : 1) * (Number(m[2]) * 60 + Number(m[3]));
       }
-      const paddedMonth = month.toString().padStart(2, "0");
-      const paddedDay = day.toString().padStart(2, "0");
-      const dateStr = `${year}-${paddedMonth}-${paddedDay}T${hour}:${minute}:${second}${offset}`;
-      date = new Date(dateStr);
-    } else {
-      // No timezone: use local timezone
-      date = new Date(
-        Number(year),
-        Number(month) - 1,
-        Number(day),
-        Number(hour),
-        Number(minute),
-        Number(second)
-      );
     }
 
-    return Math.floor(date.getTime() / 1000);
+    // build from numbers (not by parsing a string, which differs among browsers);
+    // setFullYear also keeps years below 100 as they are
+    const date = new Date(0);
+    if (offsetMin === null) {
+      date.setFullYear(y, mo - 1, d);
+      date.setHours(h, mi, s, 0);
+      return Math.floor(date.getTime() / 1000);
+    }
+    date.setUTCFullYear(y, mo - 1, d);
+    date.setUTCHours(h, mi, s, 0);
+    return Math.floor(date.getTime() / 1000) - offsetMin * 60;
   }
 
   return null;

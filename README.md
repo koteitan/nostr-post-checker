@@ -88,11 +88,11 @@ The oldest `created_at` to search for. The accepted formats are:
 
 - a UNIX timestamp of 9 or more digits (e.g. `1700000000`)
 - `YYYY/MM/DD` or `YYYY-MM-DD`, optionally followed by ` HH:MM:SS` (two digits each) and a timezone:
-  - an offset: `+09:00`, `+0900`, `-05:00`, ...
+  - an offset up to ±14:00: `+09:00`, `+0900`, `-05:00`, ...
   - an abbreviation: `JST` `KST` `HKT` `SGT` `IST` `PHT` `WIB` `THA` `AEST` `ACST` `AWST` `NZST` `NZDT` `GMT` `UTC` `BST` `CET` `CEST` `EET` `EEST` `MSK` `SAST` `EST` `EDT` `CST` `CDT` `MST` `MDT` `PST` `PDT` `AKST` `AKDT` `HST` `BRT` `ART` (`CST` is North American Central Standard Time, -06:00)
   - no timezone, or an unknown abbreviation: the local time of the browser
 
-A value in any other format is ignored.
+A value in any other format, or a date or time that does not exist (e.g. `2024/02/30`, `24:00:00`), is ignored.
 
 #### until text box
 
