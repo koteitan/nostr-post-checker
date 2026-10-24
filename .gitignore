@@ -1,0 +1,4 @@
+node_modules/
+dist/
+.live-server-error.log
+.live-server-stdout.log

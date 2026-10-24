@@ -1,0 +1,141 @@
+// Timestamp / kind parsing helpers, ported verbatim in behavior from the
+// original main.js (number coercions added for TypeScript strict mode).
+
+// Timezone abbreviation to offset mapping
+export const timezoneMap: Record<string, string> = {
+  // Asia
+  JST: "+0900", // Japan Standard Time
+  KST: "+0900", // Korea Standard Time
+  CST: "+0800", // China Standard Time
+  HKT: "+0800", // Hong Kong Time
+  SGT: "+0800", // Singapore Time
+  IST: "+0530", // India Standard Time
+  PHT: "+0800", // Philippine Time
+  WIB: "+0700", // Western Indonesian Time
+  THA: "+0700", // Thailand Standard Time
+
+  // Australia & Pacific
+  AEST: "+1000", // Australian Eastern Standard Time
+  ACST: "+0930", // Australian Central Standard Time
+  AWST: "+0800", // Australian Western Standard Time
+  NZST: "+1200", // New Zealand Standard Time
+  NZDT: "+1300", // New Zealand Daylight Time
+
+  // Europe & Africa
+  GMT: "+0000", // Greenwich Mean Time
+  UTC: "+0000", // Coordinated Universal Time
+  BST: "+0100", // British Summer Time
+  CET: "+0100", // Central European Time
+  CEST: "+0200", // Central European Summer Time
+  EET: "+0200", // Eastern European Time
+  EEST: "+0300", // Eastern European Summer Time
+  MSK: "+0300", // Moscow Time
+  SAST: "+0200", // South African Standard Time
+
+  // Americas
+  EST: "-0500", // Eastern Standard Time
+  EDT: "-0400", // Eastern Daylight Time
+  // CST duplicated in the original (North America); the Asia entry above wins.
+  CDT: "-0500", // Central Daylight Time
+  MST: "-0700", // Mountain Standard Time
+  MDT: "-0600", // Mountain Daylight Time
+  PST: "-0800", // Pacific Standard Time
+  PDT: "-0700", // Pacific Daylight Time
+  AKST: "-0900", // Alaska Standard Time
+  AKDT: "-0800", // Alaska Daylight Time
+  HST: "-1000", // Hawaii Standard Time
+  BRT: "-0300", // Brasilia Time
+  ART: "-0300", // Argentina Time
+};
+
+// Parse timestamp input (Unix timestamp or date string with optional timezone)
+export function parseTimestamp(input: string): number | null {
+  if (!input || input.trim() === "") return null;
+
+  const inputStr = input.trim();
+
+  // A pure number long enough to be a unix timestamp
+  if (inputStr.match(/^\d+$/) && inputStr.length >= 9) {
+    return parseInt(inputStr);
+  }
+
+  // YYYY-MM-DD or YYYY/MM/DD with optional HH:MM:SS [TIMEZONE]
+  const matchWithTz = inputStr.match(
+    /^(\d{4})[-/](\d{1,2})[-/](\d{1,2})(?:\s+(\d{2}):(\d{2}):(\d{2}))?(?:\s*((?:[+-]\d{2}:?\d{2})|(?:[A-Z]{3,4})))?$/
+  );
+  if (matchWithTz) {
+    const [, year, month, day, hour = "00", minute = "00", second = "00", timezone] = matchWithTz;
+    let date: Date;
+
+    if (timezone) {
+      let offset: string;
+      if (timezone.match(/^[+-]/)) {
+        // ±HH:MM format
+        offset = timezone.replace(":", "");
+      } else {
+        // Abbreviated (JST, UTC, ...)
+        offset = timezoneMap[timezone];
+        if (!offset) {
+          // Unknown timezone: use local timezone
+          date = new Date(
+            Number(year),
+            Number(month) - 1,
+            Number(day),
+            Number(hour),
+            Number(minute),
+            Number(second)
+          );
+          return Math.floor(date.getTime() / 1000);
+        }
+      }
+      const paddedMonth = month.toString().padStart(2, "0");
+      const paddedDay = day.toString().padStart(2, "0");
+      const dateStr = `${year}-${paddedMonth}-${paddedDay}T${hour}:${minute}:${second}${offset}`;
+      date = new Date(dateStr);
+    } else {
+      // No timezone: use local timezone
+      date = new Date(
+        Number(year),
+        Number(month) - 1,
+        Number(day),
+        Number(hour),
+        Number(minute),
+        Number(second)
+      );
+    }
+
+    return Math.floor(date.getTime() / 1000);
+  }
+
+  return null;
+}
+
+// Parse a kind input string into an array of numbers
+export function parseKinds(kindStr: string): number[] {
+  if (!kindStr.trim()) return [];
+  return kindStr
+    .split(/[,\s]+/)
+    .filter((k) => k.trim() !== "")
+    .map((k) => parseInt(k.trim()))
+    .filter((k) => !isNaN(k));
+}
+
+// Parse a date string or timestamp to a unix timestamp
+export function parseDate(dateStr: string): number | null {
+  if (!dateStr || dateStr.trim() === "") return null;
+
+  if (!isNaN(Number(dateStr)) && dateStr.length >= 9) {
+    return parseInt(dateStr);
+  }
+
+  try {
+    const date = new Date(dateStr);
+    if (!isNaN(date.getTime())) {
+      return Math.floor(date.getTime() / 1000);
+    }
+  } catch (e) {
+    /* ignore */
+  }
+
+  return null;
+}
