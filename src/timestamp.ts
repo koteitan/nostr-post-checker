@@ -6,7 +6,6 @@ export const timezoneMap: Record<string, string> = {
   // Asia
   JST: "+0900", // Japan Standard Time
   KST: "+0900", // Korea Standard Time
-  CST: "+0800", // China Standard Time
   HKT: "+0800", // Hong Kong Time
   SGT: "+0800", // Singapore Time
   IST: "+0530", // India Standard Time
@@ -35,7 +34,9 @@ export const timezoneMap: Record<string, string> = {
   // Americas
   EST: "-0500", // Eastern Standard Time
   EDT: "-0400", // Eastern Daylight Time
-  // CST duplicated in the original (North America); the Asia entry above wins.
+  // The original listed CST twice (China +0800, then this one); in a JS object
+  // literal the later key wins, so CST has always meant -0600.
+  CST: "-0600", // Central Standard Time (North America)
   CDT: "-0500", // Central Daylight Time
   MST: "-0700", // Mountain Standard Time
   MDT: "-0600", // Mountain Daylight Time
