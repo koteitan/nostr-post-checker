@@ -9,6 +9,8 @@
   --hover-color: #5541d7;
   --card-bg: #ffffff;
   --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --ok-text: #00875a;
+  --ng-text: #c0392b;
 }
 
 body {
@@ -90,6 +92,31 @@ address {
   width: 7rem;
 }
 
+/* fixed dark text: the light dark-mode text color is unreadable on these */
+.tderror,
+.tdexist,
+.tdnotexist {
+  color: #1a1a1a;
+}
+
+.tdrelay {
+  word-break: break-all;
+}
+
+/* The input form, the preview and the result table share the same right edge:
+   the tables are pulled out by their border-spacing so that their outer cells
+   touch the content edges. */
+.inputform table,
+#result {
+  width: calc(100% + 4px);
+  margin: 0 -2px;
+  border-spacing: 2px;
+}
+
+.inputform td {
+  padding: 0;
+}
+
 .tdcon {
   background-color: var(--card-bg);
 }
@@ -137,7 +164,7 @@ address {
 }
 
 .tarelay {
-  margin: 2px;
+  margin: 2px 0;
 }
 
 hr {
@@ -199,11 +226,13 @@ dd {
 }
 
 .fullwidth {
-  width: 95%;
+  width: 100%;
 }
 
 textarea,
 input {
+  /* width:100% must include padding and border, or they overflow the cell */
+  box-sizing: border-box;
   font-size: 1rem;
   border: 1px solid var(--border-color);
   border-radius: 4px;
@@ -268,6 +297,15 @@ input[type="button"]:hover {
   }
 
   .tdrelay {
+    font-size: 0.85rem;
+  }
+
+  /* leave room for the relay column on narrow screens */
+  .tdcon,
+  .tderror,
+  .tdexist,
+  .tdnotexist {
+    width: 4.5rem;
     font-size: 0.85rem;
   }
 }
@@ -364,6 +402,8 @@ body.dark {
   --primary-color: #a29bfe;
   --secondary-color: #8b7ff0;
   --hover-color: #b9b2ff;
+  --ok-text: #5be7a9;
+  --ng-text: #ff7b72;
 }
 
 body.dark a {
@@ -383,4 +423,66 @@ body.dark input[type="text"] {
 body.dark button:not(.menubtn),
 body.dark input[type="button"] {
   color: black;
+}
+
+/* ---- delete request column ---- */
+/* fixed width; the button fills it, so the table's right edge is the buttons' */
+.tddel {
+  width: 9rem;
+  padding: 0;
+  vertical-align: middle;
+}
+
+.tddel button {
+  width: 100%;
+  white-space: nowrap;
+}
+
+/* status of the last delete request, at the right end of the relay cell */
+.delstatus {
+  float: right;
+  margin-left: 0.6rem;
+  font-size: 0.85rem;
+}
+
+/* accepted in green, every other result in red (also inside the summary) */
+.delstatus.ok,
+.delstatus .ok {
+  color: var(--ok-text);
+}
+
+.delstatus.ng,
+.delstatus .ng {
+  color: var(--ng-text);
+}
+
+button:disabled,
+button:disabled:hover {
+  background-color: #b2bec3;
+  color: #636e72;
+  cursor: not-allowed;
+}
+
+body.dark button:disabled,
+body.dark button:disabled:hover {
+  background-color: #3a3a40;
+  color: #8a8a90;
+}
+
+/* narrow screens; kept after the delete column rules so it overrides them */
+@media (max-width: 768px) {
+  .tddel {
+    width: 7rem;
+  }
+
+  .tddel button {
+    font-size: 0.8rem;
+  }
+
+  /* the delete request status goes under the relay URL instead of beside it */
+  .delstatus {
+    float: none;
+    display: block;
+    margin-left: 0;
+  }
 }

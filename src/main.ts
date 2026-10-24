@@ -5,17 +5,20 @@ import {
   fetchProfile,
   fetchRelayList,
   relayKey,
+  sendDeleteRequest,
+  type DeleteResult,
   type NostrEvent,
   type RelayResult,
 } from "./nostr";
 import type { LazyFilter } from "rx-nostr";
 
-const version = "1.52";
+const version = "1.53";
 
 // ---- timeouts (ms) ----
 const CHECK_EOSE_TIMEOUT = 60000; // matches the original 60s overall timeout
 const PROFILE_EOSE_TIMEOUT = 5000;
 const RELAYLIST_EOSE_TIMEOUT = 5000;
+const DELETE_OK_TIMEOUT = 15000;
 
 // ---- defaults ----
 const defaultset = {
@@ -364,10 +367,15 @@ interface ResolvedEid {
   filterKey: "" | "ids" | "authors";
   idField: "" | "id" | "pubkey";
   notehex: string;
+  // which entity the id box held; "" when empty or invalid
+  entity: "" | "note" | "nevent" | "npub" | "nprofile" | "hex";
+  // event kind carried by an nevent, if any
+  kind?: number;
 }
 function resolveEid(raw: string): ResolvedEid {
+  const bad: ResolvedEid = { ok: false, filterKey: "", idField: "", notehex: "", entity: "" };
   const v = raw.trim();
-  if (v === "") return { ok: true, filterKey: "", idField: "", notehex: "" };
+  if (v === "") return { ok: true, filterKey: "", idField: "", notehex: "", entity: "" };
   const n = v.substr(0, 6) === "nostr:" ? 6 : 0;
   const body = v.substring(n);
   let filterKey: "ids" | "authors";
@@ -379,19 +387,23 @@ function resolveEid(raw: string): ResolvedEid {
     filterKey = "authors";
     idField = "pubkey";
   } else if (/^[a-fA-F0-9]+$/.test(v)) {
-    return { ok: true, filterKey: "ids", idField: "id", notehex: v };
+    return { ok: true, filterKey: "ids", idField: "id", notehex: v, entity: "hex" };
   } else {
-    return { ok: false, filterKey: "", idField: "", notehex: "" };
+    return bad;
   }
   try {
     const dec = decodeNip19(body);
-    let hex = "";
-    if (dec.type === "note" || dec.type === "npub") hex = dec.data;
-    else if (dec.type === "nevent") hex = dec.data.id;
-    else if (dec.type === "nprofile") hex = dec.data.pubkey;
-    return { ok: true, filterKey, idField, notehex: hex };
+    switch (dec.type) {
+      case "note":
+      case "npub":
+        return { ok: true, filterKey, idField, notehex: dec.data, entity: dec.type };
+      case "nevent":
+        return { ok: true, filterKey, idField, notehex: dec.data.id, entity: "nevent", kind: dec.data.kind };
+      case "nprofile":
+        return { ok: true, filterKey, idField, notehex: dec.data.pubkey, entity: "nprofile" };
+    }
   } catch (e) {
-    return { ok: false, filterKey: "", idField: "", notehex: "" };
+    return bad;
   }
 }
 
@@ -403,10 +415,67 @@ let curFilterKey: "" | "ids" | "authors" = "";
 let curIdField: "" | "id" | "pubkey" = "";
 let curNotehex = "";
 
-function preparetable(relaylist: string[]) {
+// ---- delete request (NIP-09 kind:5) ----
+// The buttons only *ask* relays to delete the event; each relay decides.
+let delTargetId = ""; // event id the table is about; "" when requests are not possible
+let delTargetKind: number | undefined; // for the optional "k" tag
+const relayDelStatus = new Map<string, HTMLElement[]>(); // relayKey -> status spans
+const rawOfKey = new Map<string, string>(); // relayKey -> relay URL as entered
+const existKeys = new Set<string>(); // relayKeys where the event exists
+let allDelButton: HTMLButtonElement | null = null; // null when requests are not possible
+
+function pushTo<T>(map: Map<string, T[]>, key: string, v: T) {
+  let arr = map.get(key);
+  if (!arr) {
+    arr = [];
+    map.set(key, arr);
+  }
+  arr.push(v);
+}
+
+// A relay cell: the text, then the status of the last delete request (floated
+// right on wide screens, on its own line below the text on narrow ones).
+function relayCell(text: string) {
+  const td = document.createElement("td");
+  td.setAttribute("class", "tdrelay");
+  const status = document.createElement("span");
+  status.setAttribute("class", "delstatus");
+  td.appendChild(document.createTextNode(text));
+  td.appendChild(status);
+  return { td, status };
+}
+
+// A cell holding a "delete request" button for `relays`; it reports to `status`.
+// `targets` is evaluated at click time; `toExist` marks the all-relays button.
+function deleteRequestCell(
+  targets: () => string[],
+  enabled: boolean,
+  status: HTMLElement,
+  toExist: boolean
+) {
+  const td = document.createElement("td");
+  td.setAttribute("class", "tddel");
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.textContent = "delete request";
+  btn.disabled = !enabled;
+  if (!enabled) {
+    btn.title = isJa()
+      ? "event id が ✅ で note1 / nevent1 のときだけ削除依頼を送れます"
+      : "Available only when the event id is checked and is a note1 / nevent1";
+  }
+  td.appendChild(btn);
+  btn.addEventListener("click", () => requestDelete(targets(), status, toExist));
+  return { td, btn };
+}
+
+function preparetable(relaylist: string[], deletable: boolean) {
   const result = el<HTMLTableElement>("result");
   while (result.firstChild) result.removeChild(result.firstChild);
   relayCells.clear();
+  relayDelStatus.clear();
+  rawOfKey.clear();
+  existKeys.clear();
   for (const raw of relaylist) {
     const tr = document.createElement("tr");
     result.appendChild(tr);
@@ -416,23 +485,133 @@ function preparetable(relaylist: string[]) {
     td0.setAttribute("class", "tdcon");
     tr.appendChild(td0);
 
-    const td1 = document.createElement("td");
-    td1.textContent = raw;
-    td1.setAttribute("class", "tdrelay");
-    tr.appendChild(td1);
+    const rel = relayCell(raw);
+    tr.appendChild(rel.td);
+    tr.appendChild(deleteRequestCell(() => [raw], deletable, rel.status, false).td);
 
     const key = relayKey(raw);
-    let arr = relayCells.get(key);
-    if (!arr) {
-      arr = [];
-      relayCells.set(key, arr);
-    }
-    arr.push(td0);
+    if (!rawOfKey.has(key)) rawOfKey.set(key, raw);
+    pushTo(relayCells, key, td0);
+    pushTo(relayDelStatus, key, rel.status);
   }
+
+  // last row: send the request at once to the relays where the event exists.
+  // It stays disabled until the first "exist" result arrives.
+  const tr = document.createElement("tr");
+  result.appendChild(tr);
+  tr.appendChild(document.createElement("td"));
+  const all = relayCell("all relays");
+  tr.appendChild(all.td);
+  const allDel = deleteRequestCell(
+    () => [...existKeys].map((k) => rawOfKey.get(k) ?? k),
+    false,
+    all.status,
+    true
+  );
+  tr.appendChild(allDel.td);
+  allDelButton = deletable ? allDel.btn : null;
+  if (allDelButton) {
+    allDelButton.title = isJa()
+      ? "イベントが存在する (exist) リレーにだけ送ります。まだ exist のリレーがありません"
+      : "Sent only to the relays where the event exists; none found yet";
+  }
+}
+
+// Status texts: accepted in green ("ok"), every other result in red ("ng").
+const DELETE_STATUS: Record<DeleteResult, [string, "ok" | "ng"]> = {
+  accepted: ["accepted", "ok"],
+  rejected: ["rejected", "ng"],
+  error: ["error to open", "ng"],
+  noresponse: ["no response", "ng"],
+};
+function showStatus(el: HTMLElement, text: string, tone: "" | "ok" | "ng") {
+  el.className = "delstatus" + (tone ? " " + tone : "");
+  el.textContent = text;
+}
+
+function requestDelete(relays: string[], summary: HTMLElement, toExist: boolean) {
+  if (delTargetId === "") return;
+  const w = window as unknown as { nostr?: any };
+  if (!w.nostr || !w.nostr.signEvent) {
+    alert(isJa() ? "NIP-07拡張がありません" : "No NIP-07 extension");
+    return;
+  }
+  const targets: string[] = [];
+  const seen = new Set<string>();
+  for (const r of relays) {
+    const k = relayKey(r);
+    if (!seen.has(k)) {
+      seen.add(k);
+      targets.push(r);
+    }
+  }
+  if (targets.length === 0) return;
+
+  const where = !toExist
+    ? targets[0]
+    : isJa()
+      ? `イベントが存在する (exist) ${targets.length} リレー`
+      : `the ${targets.length} relay${targets.length === 1 ? "" : "s"} where the event exists`;
+  const msg = isJa()
+    ? `このイベントの削除依頼 (kind:5) を ${where} に送ります。よろしいですか？`
+    : `Send a deletion request (kind:5) for this event to ${where}?`;
+  if (!confirm(msg)) return;
+
+  const single = !toExist;
+  const setStatus = (key: string, text: string, tone: "" | "ok" | "ng") => {
+    for (const s of relayDelStatus.get(key) || []) showStatus(s, text, tone);
+  };
+  const results = new Map<string, DeleteResult>(); // relayKey -> result
+  let failure = "";
+  for (const r of targets) setStatus(relayKey(r), "sending...", "");
+  if (!single) showStatus(summary, "sending...", "");
+
+  sendDeleteRequest(targets, delTargetId, delTargetKind, DELETE_OK_TIMEOUT, {
+    onResult: (relay, result, notice) => {
+      const key = relayKey(relay);
+      results.set(key, result);
+      const [text, tone] = DELETE_STATUS[result];
+      setStatus(key, text + (notice ? ": " + notice : ""), tone);
+      print("delete request: " + text + ": " + relay + (notice ? " " + notice : "") + "\n");
+    },
+    onError: (e) => {
+      failure = String(e);
+      print("delete request error: " + failure + "\n");
+    },
+    onComplete: () => {
+      if (failure) {
+        for (const r of targets) setStatus(relayKey(r), "not sent", "ng");
+        if (!single) showStatus(summary, "not sent: " + failure, "ng");
+        return;
+      }
+      if (single) return;
+      // e.g. "accepted 3, rejected 1, error to open 1": accepted always, others if any
+      summary.className = "delstatus";
+      summary.textContent = "";
+      const order: DeleteResult[] = ["accepted", "rejected", "error", "noresponse"];
+      for (const result of order) {
+        const n = [...results.values()].filter((x) => x === result).length;
+        if (result !== "accepted" && n === 0) continue;
+        if (summary.firstChild) summary.appendChild(document.createTextNode(", "));
+        const [text, tone] = DELETE_STATUS[result];
+        const part = document.createElement("span");
+        part.className = tone;
+        part.textContent = text + " " + n;
+        summary.appendChild(part);
+      }
+    },
+  });
 }
 function setRelayResult(relay: string, result: RelayResult) {
   const cells = relayCells.get(relayKey(relay));
   if (!cells) return;
+  if (result === "exist") {
+    existKeys.add(relayKey(relay));
+    if (allDelButton) {
+      allDelButton.disabled = false;
+      allDelButton.title = "";
+    }
+  }
   let text = "";
   let cls = "";
   switch (result) {
@@ -521,7 +700,16 @@ function startcheckrelays() {
   curIdField = r.idField;
   curNotehex = r.notehex;
 
-  preparetable(relaylist);
+  // delete requests: only for a checked note1 / nevent1 id
+  const deletable =
+    r.ok &&
+    el<HTMLInputElement>("eidcheck").checked &&
+    (r.entity === "note" || r.entity === "nevent") &&
+    r.notehex !== "";
+  delTargetId = deletable ? r.notehex : "";
+  delTargetKind = deletable ? r.kind : undefined;
+
+  preparetable(relaylist, deletable);
 
   if (!r.ok) {
     el("time").textContent =
@@ -556,7 +744,11 @@ function startcheckrelays() {
   startCountdown();
 
   currentDispose = checkEventOnRelays(relaylist, eventFilter, matchesEvent, CHECK_EOSE_TIMEOUT, {
-    onEvent: (_relay, ev) => pvevent(ev),
+    onEvent: (_relay, ev) => {
+      // the event's own kind is authoritative for the delete request "k" tag
+      if (delTargetId !== "" && ev.id === delTargetId) delTargetKind = ev.kind;
+      pvevent(ev);
+    },
     onResult: (relay, result) => setRelayResult(relay, result),
     onComplete: () => {
       stopCountdown();

@@ -53,7 +53,7 @@
     <form name=form0 class="fullwidth inputform">
       <span class="langja">イベントがどのリレーに存在し、どのリレーに存在していないかを確認するサイトです。</span>
       <span class="langen">You can check which relay servers the event exists on and which do not.</span>
-      <table style="width:100%">
+      <table>
         <tr>
           <td style="width:6em">
             <input type="checkbox" id="eidcheck" name="eidcheck" checked>
@@ -111,7 +111,7 @@
         </td>
       </tr></table>
     </div>
-    <table style="width:100%" id="result"></table>
+    <table id="result"></table>
     <form name=form1 id="form1">
       <div>
         <button name="copy" type="button" onclick="javascript:handle_copy_button()  ;">copy URL</button>
@@ -137,6 +137,10 @@
       <li>
         <span class="langja">relays ボックスに調べたいリレーの URL を入力します。複数リレーを調べたいときは改行で追加してください。</span>
         <span class="langen">Put the relay addresses you want to check in the "relays" box.</span>
+      </li>
+      <li>
+        <span class="langja">event id にチェックが入っていて "note1～" か "nevent1～" のとき、結果の各行の「delete request」ボタンで、そのリレーにイベントの削除依頼 (NIP-09 kind:5) を送れます。いちばん下の行のボタンは、イベントが存在する (exist) リレー全部に送ります。署名には NIP-07 拡張を使います。</span>
+        <span class="langen">When the "event id" box is checked and holds a "note1..." or "nevent1...", the "delete request" button on each result row sends a deletion request (NIP-09 kind:5) for the event to that relay, and the button on the bottom row sends it to all the relays where the event exists. The request is signed with your NIP-07 extension.</span>
       </li>
     </ul>
     <address>
